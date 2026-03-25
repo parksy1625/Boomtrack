@@ -18,17 +18,18 @@ const Globe3D = dynamic(() => import('@/components/Globe3D'), {
         <div className="absolute inset-4 rounded-full border-2 border-cyan-500/60 animate-ping [animation-delay:0.6s]" />
         <div className="absolute inset-6 rounded-full bg-cyan-400/20 animate-pulse" />
       </div>
-      <p className="text-cyan-500 text-xs tracking-widest animate-pulse">
+      <p className="text-cyan-500 text-xs tracking-widest animate-pulse font-mono">
         GLOBE INITIALIZING...
       </p>
     </div>
   ),
 })
 
-const REFRESH_INTERVAL = 30000
+const REFRESH_INTERVAL = 60_000 // 1 minute (real APIs have rate limits)
 
 export default function Home() {
   const [events, setEvents] = useState<WorldEvent[]>([])
+  const [sources, setSources] = useState<Record<string, number>>({})
   const [selectedEvent, setSelectedEvent] = useState<WorldEvent | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(new Date())
@@ -39,6 +40,7 @@ export default function Home() {
       if (!res.ok) return
       const data: EventsResponse = await res.json()
       setEvents(data.events)
+      setSources(data.sources ?? {})
       setLastUpdate(new Date())
     } catch {
       // network error — keep last state
@@ -72,7 +74,7 @@ export default function Home() {
       <div className="flex flex-1 min-h-0">
         {/* Left — Stats */}
         <aside className="w-60 flex-shrink-0 border-r border-cyan-900/30 overflow-y-auto bg-black/40">
-          <StatsPanel events={events} />
+          <StatsPanel events={events} sources={sources} />
         </aside>
 
         {/* Center — 3D Globe */}
@@ -93,12 +95,12 @@ export default function Home() {
             <div className="w-5 h-5 border-b-2 border-r-2 border-cyan-500/50" />
           </div>
 
-          {/* Bottom info bar */}
+          {/* Bottom hint */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
             <div className="flex items-center gap-4 text-[10px] font-mono text-gray-700 bg-black/60 px-4 py-1.5 rounded border border-gray-900">
               <span>드래그: 회전</span>
               <span>스크롤: 확대/축소</span>
-              <span>클릭: 이벤트 상세</span>
+              <span>점 클릭: 상세보기</span>
             </div>
           </div>
         </div>

@@ -1,251 +1,343 @@
 import { NextResponse } from 'next/server'
 import { WorldEvent, EventType, Severity } from '@/lib/types'
 
-const USGS_FEED =
-  'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson'
+// ─────────────────────────────────────────────────────────
+// Shared helpers
+// ─────────────────────────────────────────────────────────
 
-function magnitudeToSeverity(mag: number): Severity {
-  if (mag >= 7.0) return 'critical'
-  if (mag >= 5.0) return 'high'
-  if (mag >= 3.0) return 'medium'
+function isValidCoord(lat: unknown, lng: unknown): lat is number {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    lat >= -90 && lat <= 90 &&
+    lng >= -180 && lng <= 180 &&
+    !(Math.abs(lat as number) < 0.001 && Math.abs(lng as number) < 0.001)
+  )
+}
+
+/** GDELT tone (-100~+100) → Severity */
+function toneToSeverity(tone: number): Severity {
+  if (tone <= -15) return 'critical'
+  if (tone <= -7)  return 'high'
+  if (tone <= -3)  return 'medium'
   return 'low'
 }
 
-async function fetchEarthquakes(): Promise<WorldEvent[]> {
+/** "20240101T120000Z" → ISO string */
+function parseGdeltDate(raw: string): string {
   try {
-    const res = await fetch(USGS_FEED, {
-      next: { revalidate: 30 },
-      headers: { 'User-Agent': 'BoomTrack/1.0' },
-    })
-    if (!res.ok) return []
-    const data = await res.json()
+    const s = raw.replace(/[TZ]/g, '')
+    return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(8, 10)}:${s.slice(10, 12)}:${s.slice(12, 14)}Z`
+  } catch {
+    return new Date().toISOString()
+  }
+}
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.features.slice(0, 60).map((f: any) => {
+const FETCH_OPTS = (revalidate: number): RequestInit => ({
+  next: { revalidate },
+  headers: { 'User-Agent': 'BoomTrack/1.0' },
+  signal: AbortSignal.timeout(10_000),
+})
+
+// ─────────────────────────────────────────────────────────
+// 1. USGS — Real-time earthquakes
+// ─────────────────────────────────────────────────────────
+
+function magToSeverity(mag: number): Severity {
+  if (mag >= 7) return 'critical'
+  if (mag >= 5) return 'high'
+  if (mag >= 3) return 'medium'
+  return 'low'
+}
+
+async function fetchUSGS(): Promise<WorldEvent[]> {
+  const url =
+    'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson'
+  const res = await fetch(url, FETCH_OPTS(60))
+  const json = await res.json()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (json.features as any[])
+    .filter(f =>
+      isValidCoord(f.geometry?.coordinates?.[1], f.geometry?.coordinates?.[0])
+    )
+    .slice(0, 100)
+    .map(f => {
       const mag = f.properties.mag ?? 0
       return {
         id: f.id,
-        lat: f.geometry.coordinates[1],
-        lng: f.geometry.coordinates[0],
+        lat: f.geometry.coordinates[1] as number,
+        lng: f.geometry.coordinates[0] as number,
         type: 'earthquake' as EventType,
         title: f.properties.title ?? '지진 발생',
-        description: `규모 ${mag.toFixed(1)} 지진. ${f.properties.place ?? ''}`,
-        severity: magnitudeToSeverity(mag),
-        location: f.properties.place ?? '알 수 없음',
+        description: `규모 ${mag.toFixed(1)} 지진 감지. ${f.properties.place ?? ''}`,
+        severity: magToSeverity(mag),
+        location: f.properties.place ?? '',
         country: '',
-        timestamp: new Date(f.properties.time).toISOString(),
+        timestamp: new Date(f.properties.time as number).toISOString(),
         magnitude: mag,
         source: 'USGS',
+        newsUrl: f.properties.url ?? undefined,
       }
     })
-  } catch {
-    return []
-  }
 }
 
-// Global hotspot cities for simulated events
-const CITIES = [
-  { city: '서울', country: '대한민국', lat: 37.5665, lng: 126.978 },
-  { city: '도쿄', country: '일본', lat: 35.6762, lng: 139.6503 },
-  { city: '베이징', country: '중국', lat: 39.9042, lng: 116.4074 },
-  { city: '뉴욕', country: '미국', lat: 40.7128, lng: -74.006 },
-  { city: '런던', country: '영국', lat: 51.5074, lng: -0.1278 },
-  { city: '파리', country: '프랑스', lat: 48.8566, lng: 2.3522 },
-  { city: '모스크바', country: '러시아', lat: 55.7558, lng: 37.6173 },
-  { city: '두바이', country: 'UAE', lat: 25.2048, lng: 55.2708 },
-  { city: '뭄바이', country: '인도', lat: 19.076, lng: 72.8777 },
-  { city: '상파울루', country: '브라질', lat: -23.5505, lng: -46.6333 },
-  { city: '카이로', country: '이집트', lat: 30.0444, lng: 31.2357 },
-  { city: '나이로비', country: '케냐', lat: -1.2921, lng: 36.8219 },
-  { city: '라고스', country: '나이지리아', lat: 6.5244, lng: 3.3792 },
-  { city: '시드니', country: '호주', lat: -33.8688, lng: 151.2093 },
-  { city: '멕시코시티', country: '멕시코', lat: 19.4326, lng: -99.1332 },
-  { city: '부에노스아이레스', country: '아르헨티나', lat: -34.6037, lng: -58.3816 },
-  { city: '자카르타', country: '인도네시아', lat: -6.2088, lng: 106.8456 },
-  { city: '방콕', country: '태국', lat: 13.7563, lng: 100.5018 },
-  { city: '테헤란', country: '이란', lat: 35.6892, lng: 51.389 },
-  { city: '이스탄불', country: '터키', lat: 41.0082, lng: 28.9784 },
-  { city: '베를린', country: '독일', lat: 52.52, lng: 13.405 },
-  { city: '마드리드', country: '스페인', lat: 40.4168, lng: -3.7038 },
-  { city: '로마', country: '이탈리아', lat: 41.9028, lng: 12.4964 },
-  { city: '워싱턴 D.C.', country: '미국', lat: 38.9072, lng: -77.0369 },
-  { city: '베이루트', country: '레바논', lat: 33.8938, lng: 35.5018 },
-  { city: '키이우', country: '우크라이나', lat: 50.4501, lng: 30.5234 },
-  { city: '리야드', country: '사우디아라비아', lat: 24.7136, lng: 46.6753 },
-  { city: '다카', country: '방글라데시', lat: 23.8103, lng: 90.4125 },
-  { city: '카라치', country: '파키스탄', lat: 24.8607, lng: 67.0011 },
-  { city: '상하이', country: '중국', lat: 31.2304, lng: 121.4737 },
-  { city: '홍콩', country: '중국', lat: 22.3193, lng: 114.1694 },
-  { city: '싱가포르', country: '싱가포르', lat: 1.3521, lng: 103.8198 },
-  { city: '마닐라', country: '필리핀', lat: 14.5995, lng: 120.9842 },
-  { city: '양곤', country: '미얀마', lat: 16.8661, lng: 96.1951 },
-  { city: '하노이', country: '베트남', lat: 21.0285, lng: 105.8542 },
-  { city: '카불', country: '아프가니스탄', lat: 34.5553, lng: 69.2075 },
-  { city: '바그다드', country: '이라크', lat: 33.3152, lng: 44.3661 },
-  { city: '다마스쿠스', country: '시리아', lat: 33.5138, lng: 36.2765 },
-  { city: '가자', country: '팔레스타인', lat: 31.5017, lng: 34.4668 },
-  { city: '아디스아바바', country: '에티오피아', lat: 9.0054, lng: 38.7636 },
-  { city: '키갈리', country: '르완다', lat: -1.9441, lng: 30.0619 },
-  { city: '카사블랑카', country: '모로코', lat: 33.5731, lng: -7.5898 },
-  { city: '하라레', country: '짐바브웨', lat: -17.8252, lng: 31.0335 },
-  { city: '보고타', country: '콜롬비아', lat: 4.711, lng: -74.0721 },
-  { city: '리마', country: '페루', lat: -12.0464, lng: -77.0428 },
-  { city: '산티아고', country: '칠레', lat: -33.4489, lng: -70.6693 },
-  { city: '카라카스', country: '베네수엘라', lat: 10.4806, lng: -66.9036 },
-  { city: '키토', country: '에콰도르', lat: -0.1807, lng: -78.4678 },
-  { city: '알래스카', country: '미국', lat: 64.2008, lng: -153.4937 },
-  { city: '레이캬비크', country: '아이슬란드', lat: 64.1355, lng: -21.8954 },
-]
+// ─────────────────────────────────────────────────────────
+// 2. NASA EONET — Natural disasters (wildfires, volcanoes…)
+// ─────────────────────────────────────────────────────────
 
-const SIM_EVENTS: Array<{
-  type: EventType
-  titles: string[]
-  severities: Severity[]
-}> = [
-  {
-    type: 'weather',
-    titles: [
-      '태풍 접근 경보',
-      '기록적 폭설 발생',
-      '극심한 가뭄 경보',
-      '홍수 위기 경보',
-      '폭풍 주의보 발령',
-      '이상고온 경보',
-      '산불 확산 위험',
-      '토네이도 경보',
-    ],
-    severities: ['low', 'medium', 'high', 'critical'],
-  },
-  {
-    type: 'political',
-    titles: [
-      '긴급 정상회담 개최',
-      '국경 분쟁 발생',
-      '선거 결과 논란',
-      '외교 갈등 고조',
-      '국제 제재 발표',
-      '쿠데타 시도 발생',
-      '대규모 시위 발생',
-    ],
-    severities: ['low', 'medium', 'high'],
-  },
-  {
-    type: 'conflict',
-    titles: [
-      '무장 충돌 발생',
-      '휴전 협상 결렬',
-      '군사 작전 개시',
-      '민간인 대피령 발령',
-      '분쟁 지역 확산',
-      '포격 사건 발생',
-      '무인기 공격 감지',
-    ],
-    severities: ['medium', 'high', 'critical'],
-  },
-  {
-    type: 'economic',
-    titles: [
-      '금융 시장 급락',
-      '통화 가치 폭락',
-      '대규모 파업 시작',
-      '무역 분쟁 격화',
-      '기업 파산 선언',
-      '에너지 위기 발생',
-      '공급망 붕괴 경고',
-    ],
-    severities: ['low', 'medium', 'high'],
-  },
-  {
-    type: 'health',
-    titles: [
-      '신종 바이러스 발견',
-      '전염병 경보 발령',
-      '의약품 부족 사태',
-      '병원 응급 선언',
-      '보건 위기 공표',
-      '식중독 대량 발생',
-    ],
-    severities: ['medium', 'high', 'critical'],
-  },
-  {
-    type: 'disaster',
-    titles: [
-      '대규모 산불 발생',
-      '화산 폭발 징후',
-      '해일 경보 발령',
-      '대형 교통사고',
-      '댐 붕괴 위험',
-      '건물 붕괴 사고',
-      '독성 화학물질 유출',
-    ],
-    severities: ['high', 'critical'],
-  },
-]
-
-// Seeded random based on time bucket so simulated events are consistent per 30s window
-function seededRandom(seed: number) {
-  let s = seed
-  return () => {
-    s = (s * 1103515245 + 12345) & 0x7fffffff
-    return s / 0x7fffffff
-  }
+const EONET_MAP: Record<string, { type: EventType; severity: Severity }> = {
+  wildfires:     { type: 'disaster', severity: 'high' },
+  severeStorms:  { type: 'weather',  severity: 'high' },
+  volcanoes:     { type: 'disaster', severity: 'critical' },
+  floods:        { type: 'weather',  severity: 'high' },
+  earthquakes:   { type: 'earthquake', severity: 'medium' },
+  drought:       { type: 'weather',  severity: 'medium' },
+  dustHaze:      { type: 'weather',  severity: 'low' },
+  manmadeHazards:{ type: 'disaster', severity: 'high' },
+  snow:          { type: 'weather',  severity: 'medium' },
+  tempExtremes:  { type: 'weather',  severity: 'medium' },
+  seaLakeIce:    { type: 'weather',  severity: 'low' },
+  waterColor:    { type: 'disaster', severity: 'low' },
 }
 
-function generateSimulatedEvents(): WorldEvent[] {
-  const now = Date.now()
-  const bucket = Math.floor(now / 30000) // 30s bucket
-  const rng = seededRandom(bucket * 31337)
+async function fetchEONET(): Promise<WorldEvent[]> {
+  const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=60'
+  const res = await fetch(url, FETCH_OPTS(300))
+  const json = await res.json()
 
-  const count = 45
   const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const ev of (json.events as any[]) ?? []) {
+    if (!ev.geometry?.length) continue
+    const geo = ev.geometry[ev.geometry.length - 1]
+    if (geo.type !== 'Point') continue
+    const [lng, lat] = geo.coordinates as [number, number]
+    if (!isValidCoord(lat, lng)) continue
 
-  for (let i = 0; i < count; i++) {
-    const city = CITIES[Math.floor(rng() * CITIES.length)]
-    const template = SIM_EVENTS[Math.floor(rng() * SIM_EVENTS.length)]
-    const title = template.titles[Math.floor(rng() * template.titles.length)]
-    const severity = template.severities[
-      Math.floor(rng() * template.severities.length)
-    ] as Severity
-
-    const hoursAgo = rng() * 12
-    const timestamp = new Date(now - hoursAgo * 3600000).toISOString()
-
-    const latOff = (rng() - 0.5) * 3
-    const lngOff = (rng() - 0.5) * 3
+    const catId = ev.categories?.[0]?.id ?? ''
+    const mapped = EONET_MAP[catId] ?? { type: 'disaster' as EventType, severity: 'medium' as Severity }
 
     events.push({
-      id: `sim-${bucket}-${i}`,
-      lat: city.lat + latOff,
-      lng: city.lng + lngOff,
-      type: template.type,
-      title: `${city.city}: ${title}`,
-      description: `${city.country} ${city.city} 지역에서 ${title} 상황이 감지되었습니다.`,
-      severity,
-      location: city.city,
-      country: city.country,
-      timestamp,
-      source: 'BoomTrack',
+      id: `eonet-${ev.id}`,
+      lat,
+      lng,
+      type: mapped.type,
+      title: ev.title as string,
+      description: `NASA EONET 감시 중: ${ev.title}. 분류: ${ev.categories?.[0]?.title ?? '알 수 없음'}`,
+      severity: mapped.severity,
+      location: ev.title as string,
+      country: '',
+      timestamp: (geo.date as string) ?? new Date().toISOString(),
+      source: 'NASA EONET',
+      newsUrl: ev.sources?.[0]?.url as string | undefined,
     })
   }
-
-  return events.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  )
+  return events
 }
 
+// ─────────────────────────────────────────────────────────
+// 3. GDELT — Global news events with tone/severity analysis
+// ─────────────────────────────────────────────────────────
+
+/**
+ * GDELT GEO API: returns GeoJSON with one point per article,
+ * coordinates = where the article is geographically about.
+ * Properties include urltone (sentiment), url, domain, seendate.
+ */
+async function fetchGDELT(query: string, type: EventType): Promise<WorldEvent[]> {
+  const url =
+    `https://api.gdeltproject.org/api/v2/geo/geo` +
+    `?query=${encodeURIComponent(query)}` +
+    `&format=geojson&timespan=24H&maxpoints=40`
+
+  const res = await fetch(url, FETCH_OPTS(300))
+  if (!res.ok) return []
+  const json = await res.json()
+
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const f of (json.features as any[]) ?? []) {
+    const coords = f.geometry?.coordinates
+    if (!Array.isArray(coords)) continue
+    const lng = coords[0] as number
+    const lat = coords[1] as number
+    if (!isValidCoord(lat, lng)) continue
+
+    const p = f.properties ?? {}
+    const tone: number = typeof p.urltone === 'number' ? p.urltone
+                       : typeof p.tone    === 'number' ? p.tone
+                       : -5
+
+    const rawDate: string = p.seendate ?? p.date ?? ''
+    const timestamp = rawDate ? parseGdeltDate(rawDate) : new Date().toISOString()
+
+    events.push({
+      id: `gdelt-${type}-${(p.url as string | undefined)?.slice(-16) ?? Math.random().toString(36).slice(2)}`,
+      lat,
+      lng,
+      type,
+      title: (p.name ?? p.title ?? query) as string,
+      description:
+        `뉴스 감정 지수: ${tone.toFixed(1)} (${tone <= -10 ? '매우 부정' : tone <= -5 ? '부정' : tone <= 0 ? '다소 부정' : '중립/긍정'}) | 출처: ${p.domain ?? '알 수 없음'}`,
+      severity: toneToSeverity(tone),
+      location: (p.name ?? '') as string,
+      country: (p.countrycode ?? '') as string,
+      timestamp,
+      source: 'GDELT',
+      newsUrl: p.url as string | undefined,
+      toneScore: tone,
+      imageUrl: p.socialimage as string | undefined,
+      domain: p.domain as string | undefined,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 4. ReliefWeb — Humanitarian crises
+// ─────────────────────────────────────────────────────────
+
+/** Country name → approximate center coordinates */
+const COUNTRY_COORDS: Record<string, readonly [number, number]> = {
+  Afghanistan: [33.0, 65.0], Albania: [41.0, 20.0], Algeria: [28.0, 2.0],
+  Angola: [-12.0, 18.0], Argentina: [-34.0, -64.0], Armenia: [40.0, 45.0],
+  Australia: [-25.0, 133.0], Austria: [47.5, 14.0], Azerbaijan: [40.5, 47.5],
+  Bangladesh: [24.0, 90.0], Belarus: [53.0, 28.0], Belgium: [50.8, 4.5],
+  Bolivia: [-17.0, -65.0], Brazil: [-10.0, -55.0], Bulgaria: [43.0, 25.0],
+  Cambodia: [13.0, 105.0], Cameroon: [6.0, 12.0], Canada: [60.0, -96.0],
+  'Central African Republic': [7.0, 21.0], Chad: [15.0, 19.0],
+  Chile: [-30.0, -71.0], China: [35.0, 105.0], Colombia: [4.0, -72.0],
+  Congo: [-1.0, 15.0], Cuba: [22.0, -79.5], 'Czech Republic': [49.75, 15.5],
+  'Democratic Republic of the Congo': [-4.0, 22.0],
+  Denmark: [56.0, 10.0], Ecuador: [-2.0, -77.5], Egypt: [26.0, 30.0],
+  Ethiopia: [8.0, 38.0], Finland: [64.0, 26.0], France: [46.0, 2.0],
+  Georgia: [42.0, 43.5], Germany: [51.0, 10.0], Ghana: [8.0, -2.0],
+  Greece: [39.0, 22.0], Guatemala: [15.5, -90.25], Guinea: [11.0, -10.0],
+  Haiti: [19.0, -72.5], Honduras: [15.0, -86.5], Hungary: [47.0, 19.0],
+  India: [20.0, 77.0], Indonesia: [-5.0, 120.0], Iran: [32.0, 53.0],
+  Iraq: [33.0, 44.0], Ireland: [53.0, -8.0], Israel: [31.5, 34.75],
+  Italy: [42.0, 12.5], 'Ivory Coast': [7.5, -5.5], Japan: [36.0, 138.0],
+  Jordan: [31.0, 36.0], Kazakhstan: [48.0, 68.0], Kenya: [1.0, 38.0],
+  Kuwait: [29.5, 47.75], Laos: [18.0, 103.0], Lebanon: [33.85, 35.9],
+  Libya: [27.0, 17.0], Malaysia: [2.5, 112.5], Mali: [17.0, -4.0],
+  Mexico: [23.0, -102.0], Morocco: [32.0, -5.0], Mozambique: [-18.0, 35.0],
+  Myanmar: [22.0, 96.0], Nepal: [28.0, 84.0], Netherlands: [52.3, 5.3],
+  'New Zealand': [-42.0, 174.0], Nicaragua: [13.0, -85.0],
+  Niger: [17.0, 8.0], Nigeria: [10.0, 8.0], 'North Korea': [40.0, 127.0],
+  Norway: [64.0, 26.0], Pakistan: [30.0, 70.0], Palestine: [31.9, 35.2],
+  Panama: [9.0, -80.0], Peru: [-10.0, -76.0], Philippines: [13.0, 122.0],
+  Poland: [52.0, 20.0], Portugal: [39.5, -8.0], Romania: [46.0, 25.0],
+  Russia: [60.0, 100.0], Rwanda: [-2.0, 30.0], 'Saudi Arabia': [24.0, 45.0],
+  Senegal: [14.0, -14.0], Serbia: [44.0, 21.0], Singapore: [1.35, 103.82],
+  Somalia: [6.0, 46.0], 'South Africa': [-29.0, 25.0],
+  'South Korea': [36.0, 128.0], 'South Sudan': [7.0, 30.0],
+  Spain: [40.0, -4.0], 'Sri Lanka': [7.0, 81.0], Sudan: [15.0, 30.0],
+  Sweden: [60.0, 15.0], Switzerland: [47.0, 8.0], Syria: [35.0, 38.0],
+  Taiwan: [23.5, 121.0], Tanzania: [-6.0, 35.0], Thailand: [15.0, 100.0],
+  Tunisia: [34.0, 9.0], Turkey: [39.0, 35.0], Uganda: [1.0, 32.0],
+  Ukraine: [49.0, 32.0], 'United Arab Emirates': [24.0, 54.0],
+  'United Kingdom': [54.0, -2.0], 'United States': [38.0, -97.0],
+  Uruguay: [-33.0, -56.0], Uzbekistan: [41.0, 64.0],
+  Venezuela: [8.0, -66.0], Vietnam: [16.0, 108.0],
+  Yemen: [15.5, 47.5], Zimbabwe: [-20.0, 30.0],
+}
+
+const RELIEFWEB_TYPE: Record<string, EventType> = {
+  Flood: 'weather', Storm: 'weather', Drought: 'weather',
+  'Cold Wave': 'weather', 'Heat Wave': 'weather', 'Tropical Cyclone': 'weather',
+  Earthquake: 'earthquake', Tsunami: 'disaster', Volcano: 'disaster',
+  Wildfire: 'disaster', Landslide: 'disaster', Avalanche: 'disaster',
+  'Flash Flood': 'weather', Epidemic: 'health', 'Food Insecurity': 'health',
+  Conflict: 'conflict', Other: 'disaster',
+}
+
+async function fetchReliefWeb(): Promise<WorldEvent[]> {
+  const url =
+    'https://api.reliefweb.int/v1/disasters' +
+    '?appname=boomtrack' +
+    '&limit=30' +
+    '&fields[include][]=name' +
+    '&fields[include][]=date.created' +
+    '&fields[include][]=country' +
+    '&fields[include][]=primary_type' +
+    '&fields[include][]=status' +
+    '&filter[field]=status&filter[value]=ongoing'
+
+  const res = await fetch(url, FETCH_OPTS(600))
+  const json = await res.json()
+
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const item of (json.data as any[]) ?? []) {
+    const f = item.fields ?? {}
+    const countryName: string = f.country?.[0]?.name ?? ''
+    const coords = COUNTRY_COORDS[countryName]
+    if (!coords) continue
+
+    const [baseLat, baseLng] = coords
+    // Slight random spread within country
+    const lat = baseLat + (Math.random() - 0.5) * 4
+    const lng = baseLng + (Math.random() - 0.5) * 4
+
+    const typeName: string = f.primary_type?.name ?? 'Other'
+    const type: EventType = RELIEFWEB_TYPE[typeName] ?? 'disaster'
+
+    events.push({
+      id: `reliefweb-${item.id}`,
+      lat,
+      lng,
+      type,
+      title: f.name as string,
+      description: `ReliefWeb 진행 중 재난: ${f.name} (${typeName}) — ${countryName}`,
+      severity: 'high',
+      location: countryName,
+      country: countryName,
+      timestamp: (f.date?.created as string | undefined) ?? new Date().toISOString(),
+      source: 'ReliefWeb',
+      newsUrl: `https://reliefweb.int/disaster/${item.id}`,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// Main GET handler
+// ─────────────────────────────────────────────────────────
+
 export async function GET() {
-  const [quakes, simulated] = await Promise.all([
-    fetchEarthquakes(),
-    Promise.resolve(generateSimulatedEvents()),
+  const settled = await Promise.allSettled([
+    fetchUSGS(),
+    fetchEONET(),
+    fetchGDELT('conflict war attack explosion military assault', 'conflict'),
+    fetchGDELT('political crisis coup protest demonstration sanctions', 'political'),
+    fetchGDELT('economic crisis market crash financial bankruptcy recession', 'economic'),
+    fetchGDELT('epidemic virus disease outbreak pandemic health emergency', 'health'),
+    fetchReliefWeb(),
   ])
 
-  const all = [...quakes, ...simulated].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  )
+  const allEvents: WorldEvent[] = settled
+    .filter(r => r.status === 'fulfilled')
+    .flatMap(r => (r as PromiseFulfilledResult<WorldEvent[]>).value)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+  const sources: Record<string, number> = {}
+  for (const e of allEvents) {
+    sources[e.source] = (sources[e.source] ?? 0) + 1
+  }
+
+  // Log which sources failed
+  settled.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      const names = ['USGS', 'EONET', 'GDELT-conflict', 'GDELT-political', 'GDELT-economic', 'GDELT-health', 'ReliefWeb']
+      console.warn(`[BoomTrack] ${names[i]} failed:`, r.reason)
+    }
+  })
 
   return NextResponse.json({
-    events: all,
-    total: all.length,
+    events: allEvents,
+    total: allEvents.length,
     lastUpdate: new Date().toISOString(),
+    sources,
   })
 }
