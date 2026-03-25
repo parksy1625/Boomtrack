@@ -250,14 +250,19 @@ const RW_TYPE: Record<string, EventType> = {
 }
 
 async function fetchReliefWeb(): Promise<WorldEvent[]> {
-  const res = await fetch(
-    'https://api.reliefweb.int/v1/disasters' +
-    '?appname=boomtrack&limit=30' +
-    '&fields[include][]=name&fields[include][]=date.created' +
-    '&fields[include][]=country&fields[include][]=primary_type&fields[include][]=status' +
-    '&filter[field]=status&filter[value]=ongoing',
-    fetchOpts(600)
-  )
+  const res = await fetch('https://api.reliefweb.int/v1/disasters', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BoomTrack/1.0' },
+    body: JSON.stringify({
+      appname: 'boomtrack',
+      limit: 30,
+      filter: { field: 'status', value: 'ongoing' },
+      fields: { include: ['name', 'date.created', 'country', 'primary_type'] },
+    }),
+    next: { revalidate: 600 },
+    signal: AbortSignal.timeout(12_000),
+  } as RequestInit)
+  if (!res.ok) return []
   const json = await res.json()
   const events: WorldEvent[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -405,34 +410,41 @@ const GDACS_TYPE: Record<string, EventType> = {
 const GDACS_SEV: Record<string, Severity> = { Red:'critical', Orange:'high', Green:'medium' }
 
 async function fetchGDACS(): Promise<WorldEvent[]> {
-  // GDACS public JSON API
-  const url = 'https://www.gdacs.org/gdacsapi/api/events/geteventlist/EVENTS' +
-    '?eventtype=&alertlevel=&fromdate=&todate=&eventid=0&episodeid=0&limit=50'
-  const res = await fetch(url, fetchOpts(600))
+  // GDACS RSS feed (JSON API보다 안정적)
+  const res = await fetch('https://www.gdacs.org/xml/rss.xml', {
+    ...fetchOpts(600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
   if (!res.ok) return []
-  const json = await res.json()
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
   const events: WorldEvent[] = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const f of (json.features as any[]) ?? []) {
-    const [lng, lat] = f.geometry?.coordinates ?? [null, null]
-    if (!isValidCoord(lat, lng)) continue
-    const p = f.properties ?? {}
-    const evType = GDACS_TYPE[p.eventtype as string] ?? 'disaster'
-    const sev = GDACS_SEV[p.alertlevel as string] ?? 'medium'
+  for (const item of items.slice(0, 40)) {
+    if (!item.geoLat || !item.geoLng || !isValidCoord(item.geoLat, item.geoLng)) continue
+    const upper = (item.title + ' ' + item.description).toUpperCase()
+    let evType: EventType = 'disaster'
+    if (upper.includes('EARTHQUAKE')) evType = 'earthquake'
+    else if (upper.includes('FLOOD') || upper.includes('CYCLONE') || upper.includes('TROPICAL') || upper.includes('HURRICANE')) evType = 'weather'
+    const sev: Severity =
+      upper.includes('RED')    ? 'critical' :
+      upper.includes('ORANGE') ? 'high'     : 'medium'
+    // GDACS_TYPE 재활용 (기존 키워드 기반)
+    const typeFromTitle = Object.entries(GDACS_TYPE).find(([k]) =>
+      upper.includes(k.toUpperCase())
+    )
+    if (typeFromTitle) evType = typeFromTitle[1]
     events.push({
-      id: `gdacs-${p.eventid}-${p.episodeid}`,
-      lat: lat as number, lng: lng as number,
+      id: `gdacs-${(item.link ?? '').slice(-24) || Math.random().toString(36).slice(2)}`,
+      lat: item.geoLat, lng: item.geoLng,
       type: evType,
-      title: (p.htmldescription ?? p.name ?? 'GDACS 재난') as string,
-      description: `GDACS 경보 수준: ${p.alertlevel} | ${p.eventtype} | ${p.country ?? ''}`,
+      title: item.title || 'GDACS 재난',
+      description: item.description.slice(0, 300),
       severity: sev,
-      location: (p.name ?? '') as string,
-      country: (p.country ?? '') as string,
-      timestamp: p.fromdate
-        ? new Date(p.fromdate as string).toISOString()
-        : new Date().toISOString(),
+      location: '',
+      country: '',
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       source: 'GDACS',
-      newsUrl: p.url as string | undefined,
+      newsUrl: item.link || undefined,
     })
   }
   return events
@@ -730,15 +742,19 @@ export async function GET() {
   const sources: Record<string, number> = {}
   for (const e of allEvents) sources[e.source] = (sources[e.source] ?? 0) + 1
 
-  // Log failures for debugging
+  const SOURCE_NAMES = [
+    'USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
+    'FEMA','FloodList','WHO','PTWC','IAEA',
+    ...GDELT_QUERIES.map(q => `GDELT(${q.type})`),
+  ]
+
+  const failedSources: Record<string, string> = {}
   settled.forEach((r, i) => {
     if (r.status === 'rejected') {
-      const names = [
-        'USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
-        'FEMA','FloodList','WHO','PTWC','IAEA',
-        ...GDELT_QUERIES.map(q => `GDELT(${q.type})`),
-      ]
-      console.warn(`[BoomTrack] ${names[i]} 실패:`, (r as PromiseRejectedResult).reason)
+      const reason = (r as PromiseRejectedResult).reason
+      const msg = reason instanceof Error ? reason.message : String(reason)
+      failedSources[SOURCE_NAMES[i]] = msg
+      console.warn(`[BoomTrack] ${SOURCE_NAMES[i]} 실패:`, reason)
     }
   })
 
@@ -747,5 +763,6 @@ export async function GET() {
     total: allEvents.length,
     lastUpdate: new Date().toISOString(),
     sources,
+    failedSources,
   })
 }
