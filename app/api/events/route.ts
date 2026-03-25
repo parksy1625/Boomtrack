@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { WorldEvent, EventType, Severity } from '@/lib/types'
+import { parseRSSItems } from '@/lib/rssParser'
 
 // ─────────────────────────────────────────────────────────
 // Shared helpers
@@ -438,6 +439,256 @@ async function fetchGDACS(): Promise<WorldEvent[]> {
 }
 
 // ─────────────────────────────────────────────────────────
+// 9. FEMA — 미국 연방재난관리청 재난선포
+// ─────────────────────────────────────────────────────────
+
+const US_STATE_COORDS: Record<string, readonly [number, number]> = {
+  AL:[32.8,-86.8], AK:[64.2,-153], AZ:[34.3,-111.1], AR:[34.8,-92.2],
+  CA:[36.8,-119.4], CO:[39.0,-105.5], CT:[41.6,-72.7], DE:[38.9,-75.5],
+  FL:[27.8,-81.6], GA:[32.2,-83.4], HI:[20.1,-156.3], ID:[44.2,-114.5],
+  IL:[40.3,-89.0], IN:[39.8,-86.1], IA:[41.9,-93.3], KS:[38.5,-98.4],
+  KY:[37.5,-85.3], LA:[31.2,-92.1], ME:[45.3,-69.2], MD:[38.9,-76.7],
+  MA:[42.2,-71.5], MI:[44.3,-85.4], MN:[46.4,-93.1], MS:[32.7,-89.7],
+  MO:[38.4,-92.5], MT:[46.9,-110.5], NE:[41.5,-99.9], NV:[39.5,-116.9],
+  NH:[43.7,-71.6], NJ:[40.1,-74.5], NM:[34.5,-106.1], NY:[42.9,-75.5],
+  NC:[35.5,-79.8], ND:[47.5,-100.5], OH:[40.2,-82.8], OK:[35.6,-97.5],
+  OR:[44.1,-120.5], PA:[40.9,-77.8], RI:[41.7,-71.5], SC:[33.9,-80.9],
+  SD:[44.4,-100.2], TN:[35.9,-86.5], TX:[31.5,-99.3], UT:[39.4,-111.1],
+  VT:[44.1,-72.7], VA:[37.8,-79.5], WA:[47.4,-120.5], WV:[38.7,-80.6],
+  WI:[44.3,-89.8], WY:[43.0,-107.6],
+}
+
+const FEMA_TYPE: Record<string, EventType> = {
+  Flood:'weather', Hurricane:'weather', Tornado:'weather', 'Winter Storm':'weather',
+  'Severe Storm':'weather', Drought:'weather', Fire:'disaster', Earthquake:'earthquake',
+  Tsunami:'disaster', Biological:'health', Chemical:'disaster', Explosion:'terrorism',
+  'Snow':'weather', 'Coastal Storm':'weather', 'Typhoon':'weather',
+}
+
+async function fetchFEMA(): Promise<WorldEvent[]> {
+  const url =
+    'https://www.fema.gov/api/open/v2/disasterDeclarationsSummaries' +
+    '?$orderby=declarationDate%20desc&$top=30&$format=json' +
+    '&$select=disasterNumber,declarationTitle,state,incidentType,declarationDate'
+  const res = await fetch(url, fetchOpts(600))
+  if (!res.ok) return []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const json = await res.json() as any
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const item of (json.DisasterDeclarationsSummaries as any[]) ?? []) {
+    const coords = US_STATE_COORDS[item.state as string]
+    if (!coords) continue
+    const lat = coords[0] + (Math.random() - 0.5) * 2
+    const lng = coords[1] + (Math.random() - 0.5) * 2
+    const incType: string = item.incidentType ?? 'Other'
+    events.push({
+      id: `fema-${item.disasterNumber}`,
+      lat, lng,
+      type: FEMA_TYPE[incType] ?? 'disaster',
+      title: item.declarationTitle as string,
+      description: `FEMA 재난선포: ${item.declarationTitle} | 유형: ${incType} | 주(州): ${item.state}`,
+      severity: 'high',
+      location: item.state as string,
+      country: 'United States',
+      timestamp: item.declarationDate
+        ? new Date(item.declarationDate as string).toISOString()
+        : new Date().toISOString(),
+      source: 'FEMA',
+      newsUrl: `https://www.fema.gov/disaster/${item.disasterNumber}`,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 10. FloodList — 전세계 홍수 뉴스 (RSS)
+// ─────────────────────────────────────────────────────────
+
+/** 제목/설명 텍스트에서 국가 이름 매칭 → 좌표 반환 */
+function coordsFromText(text: string): readonly [number, number, string] | null {
+  for (const [name, coords] of Object.entries(COUNTRY_COORDS)) {
+    if (text.includes(name)) return [coords[0], coords[1], name]
+  }
+  return null
+}
+
+async function fetchFloodList(): Promise<WorldEvent[]> {
+  const res = await fetch('https://floodlist.com/feed', {
+    ...fetchOpts(600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 20)) {
+    let lat = item.geoLat
+    let lng = item.geoLng
+    let country = ''
+    if (!lat || !lng || !isValidCoord(lat, lng)) {
+      const found = coordsFromText(item.title + ' ' + item.description)
+      if (!found) continue
+      lat = found[0] + (Math.random() - 0.5) * 4
+      lng = found[1] + (Math.random() - 0.5) * 4
+      country = found[2]
+    }
+    if (!isValidCoord(lat, lng)) continue
+    events.push({
+      id: `flood-${(item.link ?? '').slice(-20) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'weather',
+      title: item.title || '홍수 뉴스',
+      description: item.description.slice(0, 300),
+      severity: 'high',
+      location: country,
+      country,
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'FloodList',
+      newsUrl: item.link || undefined,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 11. WHO — 세계보건기구 질병발생·긴급보건 뉴스 (RSS)
+// ─────────────────────────────────────────────────────────
+
+const WHO_KEYWORDS =
+  /outbreak|epidemic|alert|emergency|disease|virus|cholera|ebola|mpox|dengue|measles|influenza|plague|rabies|avian|health crisis|pandemic/i
+
+async function fetchWHO(): Promise<WorldEvent[]> {
+  const res = await fetch('https://www.who.int/rss-feeds/news-english.xml', {
+    ...fetchOpts(600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 30)) {
+    const text = item.title + ' ' + item.description
+    if (!WHO_KEYWORDS.test(text)) continue
+    const found = coordsFromText(text)
+    if (!found) continue
+    const lat = found[0] + (Math.random() - 0.5) * 3
+    const lng = found[1] + (Math.random() - 0.5) * 3
+    if (!isValidCoord(lat, lng)) continue
+    events.push({
+      id: `who-${(item.link ?? '').slice(-20) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'health',
+      title: item.title || 'WHO 보건 경보',
+      description: item.description.slice(0, 300),
+      severity: 'high',
+      location: found[2],
+      country: found[2],
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'WHO',
+      newsUrl: item.link || undefined,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 12. PTWC — 태평양 쓰나미 경보 센터 (RSS)
+// ─────────────────────────────────────────────────────────
+
+/** "19.4N 155.3W" 형태 좌표 파싱 */
+function parsePTWCCoords(text: string): [number, number] | null {
+  const m = text.match(/(\d+\.?\d*)\s*([NS])[,\s]+(\d+\.?\d*)\s*([EW])/i)
+  if (!m) return null
+  const lat = parseFloat(m[1]) * (m[2].toUpperCase() === 'S' ? -1 : 1)
+  const lng = parseFloat(m[3]) * (m[4].toUpperCase() === 'W' ? -1 : 1)
+  return isValidCoord(lat, lng) ? [lat, lng] : null
+}
+
+async function fetchPTWC(): Promise<WorldEvent[]> {
+  const res = await fetch('https://ptwc.weather.gov/feeds/ptwc_rss_pacific.xml', {
+    ...fetchOpts(300),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 10)) {
+    let lat = item.geoLat
+    let lng = item.geoLng
+    if (!lat || !lng || !isValidCoord(lat, lng)) {
+      const coords = parsePTWCCoords(item.title + ' ' + item.description)
+      if (!coords) continue
+      ;[lat, lng] = coords
+    }
+    const upper = (item.title + ' ' + item.description).toUpperCase()
+    const severity: Severity =
+      upper.includes('WARNING') ? 'critical' :
+      upper.includes('WATCH')   ? 'high'     : 'medium'
+    events.push({
+      id: `ptwc-${(item.link ?? '').slice(-20) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'disaster',
+      title: item.title || '쓰나미 경보',
+      description: item.description.slice(0, 300),
+      severity,
+      location: '태평양',
+      country: '',
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'PTWC',
+      newsUrl: item.link || undefined,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 13. IAEA — 국제원자력기구 핵·방사능 뉴스 (RSS)
+// ─────────────────────────────────────────────────────────
+
+const IAEA_KEYWORDS =
+  /nuclear|radioactive|radiation|reactor|meltdown|incident|emergency|contamination|isotope|uranium|plutonium|INES|safeguards/i
+
+async function fetchIAEA(): Promise<WorldEvent[]> {
+  const res = await fetch('https://www.iaea.org/newscenter/news/news-rss.xml', {
+    ...fetchOpts(600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 20)) {
+    const text = item.title + ' ' + item.description
+    if (!IAEA_KEYWORDS.test(text)) continue
+    const found = coordsFromText(text)
+    if (!found) continue
+    const lat = found[0] + (Math.random() - 0.5) * 2
+    const lng = found[1] + (Math.random() - 0.5) * 2
+    if (!isValidCoord(lat, lng)) continue
+    const upper = text.toUpperCase()
+    const severity: Severity =
+      upper.includes('EMERGENCY') || upper.includes('MELTDOWN') || upper.includes('ACCIDENT') ? 'critical' :
+      upper.includes('INCIDENT') || upper.includes('CONTAMINATION') ? 'high' : 'medium'
+    events.push({
+      id: `iaea-${(item.link ?? '').slice(-20) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'nuclear',
+      title: item.title || 'IAEA 핵 관련 뉴스',
+      description: item.description.slice(0, 300),
+      severity,
+      location: found[2],
+      country: found[2],
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'IAEA',
+      newsUrl: item.link || undefined,
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
 // Main GET handler
 // ─────────────────────────────────────────────────────────
 
@@ -461,6 +712,11 @@ export async function GET() {
     fetchSpaceWeather(),
     fetchGDACS(),
     fetchReliefWeb(),
+    fetchFEMA(),
+    fetchFloodList(),
+    fetchWHO(),
+    fetchPTWC(),
+    fetchIAEA(),
     ...GDELT_QUERIES.map(q => fetchGDELT(q.query, q.type)),
   ]
 
@@ -477,8 +733,11 @@ export async function GET() {
   // Log failures for debugging
   settled.forEach((r, i) => {
     if (r.status === 'rejected') {
-      const names = ['USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
-        ...GDELT_QUERIES.map(q => `GDELT(${q.type})`)]
+      const names = [
+        'USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
+        'FEMA','FloodList','WHO','PTWC','IAEA',
+        ...GDELT_QUERIES.map(q => `GDELT(${q.type})`),
+      ]
       console.warn(`[BoomTrack] ${names[i]} 실패:`, (r as PromiseRejectedResult).reason)
     }
   })
