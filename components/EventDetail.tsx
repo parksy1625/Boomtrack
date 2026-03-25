@@ -5,6 +5,8 @@ import { WorldEvent, EventType, Severity } from '@/lib/types'
 const TYPE_LABELS: Record<EventType, string> = {
   earthquake: '지진', weather: '기상', conflict: '분쟁',
   political: '정치', economic: '경제', health: '보건', disaster: '재난',
+  space: '우주기상', terrorism: '테러', nuclear: '핵·방사능',
+  migration: '난민·이주', environment: '기후·환경',
 }
 
 const SEVERITY_LABELS: Record<Severity, string> = {
@@ -26,9 +28,12 @@ const SEVERITY_BG: Record<Severity, string> = {
 }
 
 const TYPE_COLORS: Record<EventType, string> = {
-  earthquake: 'text-red-400', weather: 'text-cyan-400',
-  conflict: 'text-orange-400', political: 'text-blue-400',
-  economic: 'text-purple-400', health: 'text-pink-400', disaster: 'text-yellow-400',
+  earthquake: 'text-red-400',   weather: 'text-cyan-400',
+  conflict:   'text-orange-400', political: 'text-blue-400',
+  economic:   'text-purple-400', health: 'text-pink-400',
+  disaster:   'text-yellow-400', space: 'text-violet-300',
+  terrorism:  'text-red-300',    nuclear: 'text-green-400',
+  migration:  'text-amber-400',  environment: 'text-lime-400',
 }
 
 /** Returns tone label + bar width % (0-100) based on tone scale -100 to +100 */
