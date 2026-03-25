@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #00000f;
+  --foreground: #e0f0ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+
+/* Scanline animation */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Event feed item slide-in */
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Glow pulse for critical alerts */
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+  }
+  50% {
+    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 50px #ff0000;
+  }
+}
+
+@keyframes borderGlow {
+  0%,
+  100% {
+    border-color: rgba(0, 200, 255, 0.3);
+  }
+  50% {
+    border-color: rgba(0, 200, 255, 0.8);
+  }
+}
+
+.scanline {
+  animation: scan 5s linear infinite;
+  pointer-events: none;
+}
+
+.event-item {
+  animation: fadeSlide 0.25s ease-out both;
+}
+
+.critical-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.panel-border {
+  animation: borderGlow 3s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000010;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #004466;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0088cc;
+}
+
+/* Corner decoration */
+.corner-tl::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid #00ccff;
+  border-left: 2px solid #00ccff;
+  opacity: 0.6;
+}
+
+.corner-tr::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid #00ccff;
+  border-right: 2px solid #00ccff;
+  opacity: 0.6;
+}
