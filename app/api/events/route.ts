@@ -2639,21 +2639,29 @@ export async function GET() {
   const enc = new TextEncoder()
 
   // 스트리밍: 각 소스가 완료되는 즉시 청크 전송
+  // 8.5초 하드 데드라인으로 Vercel 10초 타임아웃 전에 스트림을 확실히 닫음
   const stream = new ReadableStream({
     async start(controller) {
+      let closed = false
+      const safeClose = () => {
+        if (!closed) { closed = true; try { controller.close() } catch { /* ignore */ } }
+      }
+      const deadline = setTimeout(safeClose, 8_500)
+
       const namedTasks = tasks.map((task, i) =>
         task
           .then(events => ({ events, source: SOURCE_NAMES[i] }))
-          .catch(err => {
-            console.warn(`[BoomTrack] ${SOURCE_NAMES[i]} 실패:`, err)
-            return { events: [] as WorldEvent[], source: SOURCE_NAMES[i] }
-          })
+          .catch(() => ({ events: [] as WorldEvent[], source: SOURCE_NAMES[i] }))
           .then(chunk => {
-            controller.enqueue(enc.encode(JSON.stringify(chunk) + '\n'))
+            if (!closed) {
+              try { controller.enqueue(enc.encode(JSON.stringify(chunk) + '\n')) }
+              catch { /* 스트림 이미 닫힘 */ }
+            }
           })
       )
       await Promise.all(namedTasks)
-      controller.close()
+      clearTimeout(deadline)
+      safeClose()
     },
   })
 

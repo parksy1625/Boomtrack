@@ -48,7 +48,7 @@ export default function Home() {
   const fetchEvents = useCallback(async () => {
     try {
       const res = await fetch('/api/events')
-      if (!res.ok) return
+      if (!res.ok) { setIsLoading(false); return }
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
       let buf = ''
