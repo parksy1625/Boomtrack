@@ -840,7 +840,7 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
   // 사헬 지역
   'Maiduguri':[11.84,13.16],'Sokoto':[13.06,5.24],'Gao':[16.27,-0.04],'Timbuktu':[16.77,-3.00],
   // 남미 추가
-  'Medellín':[6.25,-75.56],'Barranquilla':[10.96,-74.80],'Cartagena':[10.40,-75.51],
+  'Barranquilla':[10.96,-74.80],'Cartagena':[10.40,-75.51],
   'Maracaibo VE':[10.67,-71.61],'Valencia VE':[10.18,-68.00],'Barquisimeto':[10.07,-69.32],
   'Cochabamba':[-17.39,-66.16],'Sucre':[-19.05,-65.26],
   'Cuenca':[-2.90,-79.00],
