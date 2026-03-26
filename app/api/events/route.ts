@@ -201,6 +201,31 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://allafrica.com/tools/headlines/rss/latest/full.rss',  name: 'AllAfrica' },
   // ── 국제기구 ─────────────────────────────────────────────
   { url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml',     name: 'UN News' },
+  // ── 북미·중남미 ──────────────────────────────────────────
+  { url: 'https://feeds.npr.org/1004/rss.xml',                         name: 'NPR' },
+  { url: 'https://en.mercopress.com/rss',                              name: 'Mercopress' },
+  // ── 유럽 ─────────────────────────────────────────────────
+  { url: 'https://www.spiegel.de/international/index.rss',             name: 'Der Spiegel' },
+  { url: 'https://www.politico.eu/feed/',                              name: 'Politico Europe' },
+  { url: 'https://www.kyivindependent.com/feed/',                      name: 'Kyiv Independent' },
+  { url: 'https://www.ukrinform.net/rss/block-lastnews',               name: 'Ukrinform' },
+  { url: 'https://tass.com/rss/v2.xml',                                name: 'TASS' },
+  // ── 중동 ─────────────────────────────────────────────────
+  { url: 'https://www.jpost.com/Rss/RssFeedsHeadlines.aspx',          name: 'Jerusalem Post' },
+  { url: 'https://www.thenationalnews.com/rss',                        name: 'The National' },
+  { url: 'https://www.middleeasteye.net/rss',                          name: 'Middle East Eye' },
+  // ── 동남아시아 ───────────────────────────────────────────
+  { url: 'https://www.channelnewsasia.com/rss/latest_news',            name: 'CNA' },
+  { url: 'https://www.straitstimes.com/news/world/rss.xml',            name: 'Straits Times' },
+  { url: 'https://asiatimes.com/feed/',                                name: 'Asia Times' },
+  // ── 동북아시아 ───────────────────────────────────────────
+  { url: 'https://english.kyodonews.net/rss/news.xml',                 name: 'Kyodo News' },
+  { url: 'https://www.koreaherald.com/rss/index.htm',                  name: 'Korea Herald' },
+  { url: 'https://www.scmp.com/rss/91/feed',                           name: 'SCMP' },
+  // ── 오세아니아 ───────────────────────────────────────────
+  { url: 'https://www.rnz.co.nz/rss/world.xml',                        name: 'RNZ' },
+  // ── 아프리카 (추가) ──────────────────────────────────────
+  { url: 'https://www.premiumtimesng.com/feed',                        name: 'Premium Times' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
