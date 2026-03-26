@@ -902,28 +902,193 @@ const REGION_COORDS: Record<string, readonly [number, number]> = {
   'Borneo':[1.00,114.00],'Papua':[-4.00,136.00],
 }
 
-/** 텍스트에서 위치 추출 (뉴스 데이트라인 → 도시 → 국가 순)
+// ── 추가 도시 (CITY_COORDS 확장) ──────────────────────────
+Object.assign(CITY_COORDS, {
+  // 일본
+  'Nagoya':[35.18,136.91],'Sapporo':[43.06,141.35],'Fukuoka':[33.59,130.40],
+  'Kobe':[34.69,135.20],'Sendai':[38.27,140.87],'Kitakyushu':[33.88,130.88],
+  'Kawasaki':[35.52,139.72],'Saitama':[35.86,139.65],'Kumamoto':[32.80,130.71],
+  'Naha':[26.21,127.68],'Nagasaki':[32.74,129.87],'Kagoshima':[31.60,130.56],
+  // 한국
+  'Daegu':[35.87,128.60],'Gwangju':[35.16,126.85],'Daejeon':[36.35,127.39],
+  'Ulsan':[35.54,129.31],'Suwon':[37.27,127.01],'Changwon':[35.23,128.68],
+  // 중국 추가
+  'Suzhou':[31.30,120.60],'Hangzhou':[30.27,120.15],'Ningbo':[29.87,121.54],
+  'Wuxi':[31.57,120.30],'Zibo':[36.79,118.05],'Tangshan':[39.63,118.18],
+  'Shijiazhuang':[38.04,114.50],'Wenzhou':[28.02,120.67],'Foshan':[23.02,113.12],
+  'Dongguan':[23.02,113.75],'Zhongshan':[22.52,113.39],'Zhuhai':[22.27,113.57],
+  // 인도 추가
+  'Rajkot':[22.30,70.78],'Jodhpur':[26.29,73.03],'Raipur':[21.25,81.63],
+  'Ranchi':[23.34,85.31],'Gwalior':[26.22,78.18],'Jabalpur':[23.18,79.95],
+  'Kota':[25.18,75.85],'Thiruvananthapuram':[8.52,76.94],'Kozhikode':[11.25,75.78],
+  'Madurai':[9.92,78.12],'Tiruchirappalli':[10.79,78.70],'Salem':[11.65,78.15],
+  'Guwahati':[26.18,91.75],'Shillong':[25.57,91.89],'Imphal':[24.82,93.95],
+  'Dehradun':[30.32,78.03],'Shimla':[31.10,77.17],'Chandigarh':[30.74,76.79],
+  // 파키스탄
+  'Quetta':[30.19,67.00],'Multan':[30.20,71.47],'Rawalpindi':[33.60,73.04],
+  'Faisalabad':[31.42,73.08],'Hyderabad Sindh':[25.37,68.37],'Gujranwala':[32.16,74.19],
+  // 방글라데시
+  'Sylhet':[24.90,91.87],'Rajshahi':[24.37,88.60],'Khulna':[22.85,89.57],
+  // 스리랑카
+  'Kandy':[7.29,80.64],'Jaffna':[9.67,80.02],'Galle':[6.05,80.22],
+  // 인도네시아
+  'Bandung':[-6.92,107.61],'Makassar':[-5.15,119.41],'Semarang':[-7.00,110.42],
+  'Palembang':[-2.99,104.76],'Banjarmasin':[-3.32,114.59],'Padang':[-0.95,100.35],
+  // 필리핀
+  'Zamboanga':[6.91,122.07],'Cagayan de Oro':[8.48,124.65],'General Santos':[6.11,125.17],
+  'Iloilo':[10.72,122.57],'Bacolod':[10.68,122.95],'Tacloban':[11.24,125.00],
+  // 태국
+  'Hat Yai':[7.01,100.47],'Khon Kaen':[16.43,102.83],'Chiang Rai':[19.91,99.83],
+  'Nakhon Ratchasima':[14.97,102.10],'Udon Thani':[17.41,102.79],
+  // 베트남
+  'Hue':[16.47,107.60],'Can Tho':[10.03,105.79],'Nha Trang':[12.25,109.18],
+  'Hai Phong':[20.86,106.68],'Bien Hoa':[10.95,106.82],
+  // 미얀마
+  'Mawlamyine':[16.49,97.63],'Pathein':[16.78,94.73],'Loikaw':[19.68,97.21],
+  // 러시아
+  'Omsk':[54.99,73.37],'Samara':[53.20,50.15],'Perm':[58.01,56.23],
+  'Ufa':[54.74,55.97],'Volgograd':[48.71,44.51],'Krasnoyarsk':[56.01,92.88],
+  'Saratov':[51.53,46.03],'Tolyatti':[53.51,49.42],'Izhevsk':[56.85,53.21],
+  'Khabarovsk':[48.48,135.08],'Chelyabinsk':[55.16,61.40],'Orenburg':[51.77,55.10],
+  // 아프리카 추가
+  'Douala':[4.05,9.70],'Yaoundé':[3.87,11.52],'Lilongwe':[-13.97,33.79],
+  'Blantyre':[-15.79,35.00],'Beira':[-19.84,34.84],'Mombasa':[-4.05,39.67],
+  'Nakuru':[-0.27,36.07],'Eldoret':[0.52,35.27],'Entebbe':[0.05,32.46],
+  'Mwanza':[-2.52,32.90],'Arusha':[-3.37,36.68],'Zanzibar':[-6.17,39.20],
+  'Lubango':[-14.92,13.49],'Huambo':[-12.78,15.74],
+  'Tamale':[9.40,-0.85],'Sekondi':[-4.93,-1.70],
+  'Kigali':[-1.95,30.06],'Gitega':[-3.43,29.92],
+  'Hargeisa':[9.56,44.07],'Berbera':[10.44,45.02],
+  'Tobruk':[32.08,23.97],'Misrata':[32.37,15.09],'Sabha':[27.04,14.43],
+  'Sfax':[34.74,10.76],'Sousse':[35.83,10.64],
+  // 유럽 추가
+  'Luxembourg City':[49.61,6.13],'Vaduz':[47.14,9.52],
+  'Tallinn':[59.44,24.75],'Tartu':[58.38,26.72],
+  'Vilnius':[54.69,25.28],'Kaunas':[54.90,23.90],
+  'Riga':[56.95,24.11],'Daugavpils':[55.87,26.54],
+  'Reykjavik':[64.14,-21.95],
+  'Minsk':[53.90,27.57],'Gomel':[52.44,30.99],'Brest':[52.10,23.68],
+  'Chisinau':[47.00,28.86],
+  'Tirana':[41.33,19.83],'Durrës':[41.32,19.45],
+  'Podgorica':[42.44,19.26],'Prishtina':[42.67,21.17],
+  'Skopje':[41.99,21.43],'Ohrid':[41.12,20.80],
+  'Sarajevo':[43.85,18.36],'Banja Luka':[44.77,17.19],
+  'Nicosia':[35.17,33.37],'Limassol':[34.68,33.04],
+  // 중동 추가
+  'Zarqa':[32.07,36.09],'Irbid':[32.55,35.85],'Aqaba':[29.53,35.00],
+  'Hodeida':[14.80,43.00],'Al Mukalla':[14.55,49.13],
+  'Sohar':[24.36,56.74],'Salalah':[17.02,54.09],
+  'Al Ain':[24.23,55.76],'Fujairah':[25.12,56.34],
+  'Tabuk':[28.39,36.57],'Dammam':[26.43,50.10],'Al Hofuf':[25.38,49.59],
+  // 북미 추가
+  'Quebec City':[46.81,-71.21],'Halifax':[44.65,-63.60],'Victoria':[48.43,-123.37],
+  'Regina':[50.45,-104.61],'Saskatoon':[52.13,-106.67],
+  'Guadalajara MX':[20.68,-103.35],'Puebla':[19.04,-98.20],'León':[21.12,-101.67],
+  'Ciudad Juárez':[31.73,-106.49],'Mérida MX':[20.97,-89.62],'Acapulco':[16.86,-99.88],
+  // 중남미 추가
+  'Cali':[3.44,-76.52],'Bucaramanga':[7.12,-73.12],'Pereira':[4.81,-75.69],
+  'Maracay':[10.24,-67.59],'Ciudad Guayana':[8.35,-62.64],
+  'Belém':[-1.46,-48.50],'Goiânia':[-16.68,-49.26],'Florianópolis':[-27.59,-48.55],
+  'Natal':[-5.79,-35.21],'Maceió':[-9.67,-35.74],'Teresina':[-5.09,-42.80],
+  'Cúcuta':[7.89,-72.51],'Ibagué':[4.44,-75.23],
+  'Trujillo PE':[-8.11,-79.02],'Chiclayo':[-6.78,-79.84],'Iquitos':[-3.74,-73.25],
+  'Arequipa':[-16.41,-71.54],'Cusco':[-13.53,-71.97],
+  'Santa Cruz BO':[-17.79,-63.18],'Cochabamba':[-17.39,-66.16],
+  'Asunción':[-25.29,-57.64],'Ciudad del Este':[-25.51,-54.62],
+  'Montevideo':[-34.90,-56.19],'Salto':[-31.38,-57.96],
+  'Rosario':[-32.95,-60.66],'Córdoba AR':[-31.42,-64.18],'Mendoza':[-32.89,-68.83],
+  'Santiago':[-33.46,-70.65],'Valparaíso':[-33.05,-71.62],'Antofagasta':[-23.65,-70.40],
+  // 카리브해
+  'Port-of-Spain':[10.65,-61.52],'Bridgetown':[13.10,-59.62],
+  'Nassau':[25.04,-77.35],'Georgetown GY':[6.80,-58.16],
+  'Paramaribo':[5.87,-55.17],'Cayenne':[4.93,-52.33],
+} as Record<string, readonly [number, number]>)
+
+// ── 도시 추출 최적화: 모듈 레벨 캐시 ──────────────────────
+/** 소문자 도시명 → { 표준명, 좌표 } 해시맵 (O(1) 조회) */
+const _cityMap = new Map(
+  Object.entries(CITY_COORDS).map(([k, v]) => [k.toLowerCase(), { name: k, c: v }])
+)
+/** 역사적·현지 별칭 → 표준 소문자 도시명 */
+const CITY_ALIASES: Record<string, string> = {
+  'peking':'beijing','peiping':'beijing','canton':'guangzhou','mukden':'shenyang',
+  'bombay':'mumbai','calcutta':'kolkata','madras':'chennai','bangalore':'bangalore',
+  'saigon':'ho chi minh city','ho chi minh':'ho chi minh city',
+  'rangoon':'yangon','dacca':'dhaka',
+  'kiev':'kyiv','kharkov':'kharkiv','odessa':'odessa',
+  'leningrad':'saint petersburg','petrograd':'saint petersburg',
+  'leopoldville':'kinshasa','elisabethville':'lubumbashi','salisbury':'harare',
+  'stanleyville':'kisangani','lourenco marques':'maputo',
+  'christiania':'oslo','helsingfors':'helsinki',
+  'batavia':'jakarta','formosa':'taipei',
+  'aden':'aden','mecca':'mecca','jeddah':'jeddah',
+  'tehran':'tehran','teheran':'tehran',
+  'moscow':'moscow','moskov':'moscow',
+  'petrópolis':'rio de janeiro',
+  'port au prince':'port-au-prince',
+}
+/** 전치사 패턴: "in Cairo", "near Aleppo", "from Kyiv" */
+const _PREP_RE = /\b(?:in|near|at|from|outside|around|across|throughout|into|within|toward|towards)\s+([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:[\s-][A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})/g
+/** 긴 이름 우선 정렬된 도시 목록 (캐시) */
+const _sortedCities = Object.entries(CITY_COORDS).sort((a, b) => b[0].length - a[0].length)
+const _sortedRegions = Object.entries(REGION_COORDS).sort((a, b) => b[0].length - a[0].length)
+
+/** 소문자 도시명 → 좌표 반환 (별칭 포함) */
+function lookupCity(raw: string): readonly [number, number, string, number] | null {
+  const lower = raw.toLowerCase().trim()
+  const direct = _cityMap.get(lower)
+  if (direct) return [direct.c[0], direct.c[1], direct.name, 0.12]
+  const alias = CITY_ALIASES[lower]
+  if (alias) {
+    const a = _cityMap.get(alias)
+    if (a) return [a.c[0], a.c[1], a.name, 0.12]
+  }
+  return null
+}
+
+/** 단어경계 확인 (짧은 도시명의 오탐 방지) */
+function hasWordBoundary(text: string, idx: number, len: number): boolean {
+  const before = idx === 0 || !/[a-zA-Z]/.test(text[idx - 1])
+  const after  = idx + len >= text.length || !/[a-zA-Z]/.test(text[idx + len])
+  return before && after
+}
+
+/** 텍스트에서 위치 추출
+ *  순서: 데이트라인 → 전치사패턴 → 전문스캔(단어경계) → 지역 → 국가
  *  반환: [lat, lng, 장소명, jitter반경(도)] */
 function coordsFromText(text: string): readonly [number, number, string, number] | null {
-  // 1. 뉴스 데이트라인: "MOSCOW (Reuters) -" / "KYIV, Ukraine —" 형태
-  const dl = text.match(/^([A-Z][A-Z '.()-]{1,28}?)(?:,\s*[A-Za-z ]+?)?\s*(?:\([^)]+\)\s*)?[-–—]/)
+  // 1. 뉴스 데이트라인: "MOSCOW (Reuters) —" / "KYIV, Ukraine —"
+  const dl = text.match(/^([A-Z][A-Za-z\s'.()-]{1,32}?)(?:,\s*[A-Za-z\s]+?)?\s*(?:\([^)]{1,30}\)\s*)?[-–—]/)
   if (dl) {
-    const raw = dl[1].trim()
-    for (const [name, c] of Object.entries(CITY_COORDS)) {
-      if (raw.toUpperCase() === name.toUpperCase()) return [c[0], c[1], name, 0.12]
-    }
+    const r = lookupCity(dl[1].trim())
+    if (r) return r
   }
-  // 2. 전체 텍스트에서 도시명 (긴 이름 우선 → 더 구체적)
-  const sortedCities = Object.entries(CITY_COORDS).sort((a, b) => b[0].length - a[0].length)
-  for (const [name, c] of sortedCities) {
-    if (text.includes(name)) return [c[0], c[1], name, 0.12]
+
+  // 2. 전치사 패턴: "in Gaza", "near Kyiv", "from Kabul"
+  _PREP_RE.lastIndex = 0
+  let m: RegExpExecArray | null
+  while ((m = _PREP_RE.exec(text)) !== null) {
+    const r = lookupCity(m[1])
+    if (r) return r
   }
-  // 3. 주·도·지역 중간 레이어
-  const sortedRegions = Object.entries(REGION_COORDS).sort((a, b) => b[0].length - a[0].length)
-  for (const [name, c] of sortedRegions) {
-    if (text.includes(name)) return [c[0], c[1], name, 1.0]
+
+  // 3. 전문 스캔 — 긴 이름 우선, 단어경계 체크
+  const lower = text.toLowerCase()
+  for (const [name, c] of _sortedCities) {
+    const nl = name.toLowerCase()
+    const idx = lower.indexOf(nl)
+    if (idx === -1) continue
+    // 6자 미만 단어는 경계 체크 (Nice, Bath, Aden 등 오탐 방지)
+    if (nl.length < 6 && !hasWordBoundary(lower, idx, nl.length)) continue
+    return [c[0], c[1], name, 0.12]
   }
-  // 4. 국가명 폴백 (jitter 축소)
+
+  // 4. 주·도·지역 중간 레이어
+  for (const [name, c] of _sortedRegions) {
+    if (lower.includes(name.toLowerCase())) return [c[0], c[1], name, 1.0]
+  }
+
+  // 5. 국가 폴백
   for (const [name, c] of Object.entries(COUNTRY_COORDS)) {
     if (text.includes(name)) return [c[0], c[1], name, 1.5]
   }
