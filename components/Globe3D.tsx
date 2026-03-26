@@ -74,20 +74,17 @@ interface GlobeRing {
 interface Props {
   events: WorldEvent[]
   onEventClick?: (e: WorldEvent) => void
-  onClusterClick?: (events: WorldEvent[]) => void
 }
 
-export default function Globe3D({ events, onEventClick, onClusterClick }: Props) {
-  const containerRef   = useRef<HTMLDivElement>(null)
+export default function Globe3D({ events, onEventClick }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeRef       = useRef<any>(null)
-  const eventsRef      = useRef<WorldEvent[]>(events)
-  const onClickRef     = useRef(onEventClick)
-  const onClusterRef   = useRef(onClusterClick)
+  const globeRef    = useRef<any>(null)
+  const eventsRef   = useRef<WorldEvent[]>(events)
+  const onClickRef  = useRef(onEventClick)
 
-  useEffect(() => { onClickRef.current   = onEventClick   }, [onEventClick])
-  useEffect(() => { onClusterRef.current = onClusterClick }, [onClusterClick])
-  useEffect(() => { eventsRef.current    = events         }, [events])
+  useEffect(() => { onClickRef.current = onEventClick }, [onEventClick])
+  useEffect(() => { eventsRef.current = events },         [events])
 
   const toPoints = useCallback((clusters: Cluster[], rScale: number): GlobePt[] =>
     clusters.map(c => {
@@ -97,8 +94,8 @@ export default function Globe3D({ events, onEventClick, onClusterClick }: Props)
       return {
         lat: c.lat, lng: c.lng,
         color:    TYPE_COLORS[c.type] ?? 'rgba(255,255,255,0.8)',
-        altitude: Math.min(baseAlt * cScale * 0.64, 0.22),
-        radius:   Math.min(baseR * cScale * rScale * 0.64, 2.56),
+        altitude: Math.min(baseAlt * cScale * 0.8, 0.28),
+        radius:   Math.min(baseR * cScale * rScale * 0.8, 3.2),
         cluster: c,
       }
     }), [])
@@ -141,14 +138,10 @@ export default function Globe3D({ events, onEventClick, onClusterClick }: Props)
         .pointsMerge(false)
         .onPointClick((pt: GlobePt) => {
           if (!pt?.cluster) return
-          if (pt.cluster.count > 1 && onClusterRef.current) {
-            onClusterRef.current(pt.cluster.events)
-          } else {
-            const top = pt.cluster.events.reduce((b, e) =>
-              SEVERITY_RANK[e.severity] > SEVERITY_RANK[b.severity] ? e : b
-            )
-            onClickRef.current?.(top)
-          }
+          const top = pt.cluster.events.reduce((b, e) =>
+            SEVERITY_RANK[e.severity] > SEVERITY_RANK[b.severity] ? e : b
+          )
+          onClickRef.current?.(top)
         })
         .onPointHover((pt: GlobePt | null) => {
           container.style.cursor = pt ? 'pointer' : 'default'
