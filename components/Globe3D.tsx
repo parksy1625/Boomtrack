@@ -155,11 +155,17 @@ export default function Globe3D({ events, onEventClick }: Props) {
       globe.pointOfView({ altitude: 2.2 }, 0)
       globeRef.current = globe
 
-      // Re-cluster on zoom
+      // Re-cluster on zoom only (ignore rotation — altitude unchanged)
+      let lastAlt = 2.2
       let debounce: ReturnType<typeof setTimeout>
       globe.controls().addEventListener('change', () => {
+        const { altitude } = globe.pointOfView()
+        if (Math.abs(altitude - lastAlt) < 0.04) return
         clearTimeout(debounce)
-        debounce = setTimeout(() => recluster(globe), 30)
+        debounce = setTimeout(() => {
+          lastAlt = altitude
+          recluster(globe)
+        }, 30)
       })
 
       const obs = new ResizeObserver(() => {
