@@ -294,6 +294,7 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://www.osce.org/taxonomy/term/384/feed',               name: 'OSCE' },
   { url: 'https://www.wfp.org/rss.xml',                               name: 'WFP' },
   { url: 'https://www.iom.int/rss.xml',                               name: 'IOM' },
+  { url: 'https://www.worldbank.org/en/news/rss',                     name: 'World Bank' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
