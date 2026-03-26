@@ -1122,6 +1122,39 @@ Object.assign(CITY_COORDS, {
   'Stepanakert':[39.82,46.75],'Gyumri':[40.79,43.84],'Vanadzor':[40.81,44.49],
   'Rustavi':[41.55,44.99],'Kutaisi':[42.27,42.70],'Batumi':[41.65,41.64],
   'Ganja':[40.68,46.36],'Sumqayit':[40.59,49.65],'Nakhchivan':[39.21,45.41],
+
+  // ── 추가 도시 (기존 DB에 없는 것만) ──
+  // 미국
+  'Oklahoma City':[35.47,-97.52],'Virginia Beach':[36.85,-75.98],
+  'Orlando':[28.54,-81.38],'Buffalo':[42.89,-78.87],
+  // 유럽
+  'Bilbao':[43.26,-2.93],'Malaga':[36.72,-4.42],'Heraklion':[35.34,25.14],
+  'Bursa':[40.19,29.06],'Konya':[37.87,32.48],'Monaco':[43.73,7.42],
+  // 중동
+  'Fallujah':[33.35,43.79],'Kirkuk':[35.47,44.39],'Najaf':[32.00,44.34],
+  'Karbala':[32.62,44.03],'Idlib':[35.93,36.63],'Sanaa':[15.35,44.21],
+  // 남아시아
+  'Thimphu':[27.47,89.64],'Pokhara':[28.21,83.99],'Hyderabad PK':[25.39,68.37],
+  // 동남아시아
+  'Haiphong':[20.86,106.68],'Tangerang':[-6.18,106.63],
+  'Depok':[-6.40,106.82],'Ipoh':[4.60,101.08],'Kota Kinabalu':[5.98,116.07],
+  'Kuching':[1.55,110.34],'George Town':[5.41,100.34],'Quezon City':[14.68,121.04],
+  'Cebu City':[10.32,123.90],'Marawi':[7.99,124.29],'Cotabato':[7.22,124.25],
+  'Pakse':[15.12,105.79],'Lashio':[22.93,97.75],
+  // 동아시아
+  'Yokohama':[35.44,139.64],'Taichung':[24.15,120.67],'Tainan':[22.99,120.22],
+  // 아프리카
+  'N Djamena':[12.11,15.04],'Nouakchott':[18.08,-15.97],'Porto Novo':[6.50,2.63],
+  'Port Elizabeth':[-33.96,25.61],'Mbuji-Mayi':[-6.15,23.60],'Bukavu':[-2.51,28.86],
+  'Kananga':[-5.90,22.42],'Benin City':[6.34,5.63],'Jos':[9.93,8.89],
+  'Warri':[5.52,5.75],'Kaduna':[10.52,7.44],'Zaria':[11.08,7.71],
+  // 중남미
+  'Campinas':[-22.91,-47.06],'Curitiba':[-25.43,-49.27],
+  'San Jose CR':[9.93,-84.08],'San Juan':[18.47,-66.11],
+  // 오세아니아
+  'Darwin':[-12.46,130.84],'Hobart':[-42.88,147.33],
+  'Noumea':[-22.27,166.46],'Papeete':[-17.54,-149.57],'Nuku alofa':[-21.14,-175.22],
+
 } as Record<string, readonly [number, number]>)
 
 // ── 도시 추출 최적화: 모듈 레벨 캐시 ──────────────────────
@@ -1145,7 +1178,42 @@ const CITY_ALIASES: Record<string, string> = {
   'tehran':'tehran','teheran':'tehran',
   'moscow':'moscow','moskov':'moscow',
   'petrópolis':'rio de janeiro',
-  'port au prince':'port-au-prince',
+  'port au prince':'port-au-prince','port-au-prince':'port au prince',
+  'new york city':'new york','nyc':'new york','ny':'new york',
+  'la':'los angeles','l.a.':'los angeles','sf':'san francisco',
+  'd.c.':'washington','dc':'washington','d.c':'washington',
+  'the hague':'amsterdam','den haag':'amsterdam',
+  'cologne':'cologne','köln':'cologne',
+  'munich':'munich','münchen':'munich',
+  'vienna':'vienna','wien':'vienna',
+  'rome':'rome','roma':'rome',
+  'athens':'athens','athina':'athens',
+  'warsaw':'warsaw','warszawa':'warsaw',
+  'prague':'prague','praha':'prague',
+  'budapest':'budapest','bucharest':'bucharest',
+  'istanbul':'istanbul','constantinople':'istanbul',
+  'beijing':'beijing',
+  'seoul':'seoul','busan':'busan',
+  'tokyo':'tokyo','osaka':'osaka',
+  'mexico city':'mexico city','ciudad de mexico':'mexico city',
+  'buenos aires':'buenos aires','sao paulo':'sao paulo',
+  'rio':'rio de janeiro','rio de janeiro':'rio de janeiro',
+  'bogota':'bogota','bogotá':'bogota',
+  'lima':'lima','santiago':'santiago',
+  'lagos':'lagos','nairobi':'nairobi','cairo':'cairo',
+  'johannesburg':'johannesburg','jo burg':'johannesburg','joburg':'johannesburg',
+  'cape town':'cape town','capetown':'cape town',
+  'new delhi':'new delhi','delhi':'new delhi',
+  'mumbai':'mumbai','kolkata':'kolkata','chennai':'chennai',
+  'dhaka':'dhaka','karachi':'karachi','lahore':'lahore',
+  'kabul':'kabul','baghdad':'baghdad',
+  'riyadh':'riyadh','dubai':'dubai',
+  'tel aviv':'tel aviv','jerusalem':'jerusalem','gaza city':'gaza',
+  'tripoli':'tripoli (libya)',
+  'phnom penh':'phnom penh','vientiane':'vientiane',
+  'kuala lumpur':'kuala lumpur','kl':'kuala lumpur',
+  'ho chi minh city':'ho chi minh city','hcmc':'ho chi minh city',
+  'xi\'an':'xi an','xian':'xi an',
 }
 /** 전치사 패턴: "in Cairo", "near Aleppo", "from Kyiv" */
 const _PREP_RE = /\b(?:in|near|at|from|outside|around|across|throughout|into|within|toward|towards)\s+([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:[\s-][A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})/g
