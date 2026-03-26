@@ -11,16 +11,16 @@ function jaccard(a: string, b: string): number {
   return inter / (wa.size + wb.size - inter)
 }
 
-/** 유사 이벤트를 합침: 같은 타입 + 12h 이내 + 좌표 1.5° 이내 + 제목 유사도 35%+ */
+/** 유사 이벤트를 합침: 같은 타입 + 6h 이내 + 좌표 0.8° 이내 + 제목 유사도 55%+ */
 export function dedup(events: WorldEvent[]): WorldEvent[] {
   const out: WorldEvent[] = []
   for (const e of events) {
     const dup = out.find(o =>
       o.type === e.type &&
-      Math.abs(o.lat - e.lat) < 1.5 &&
-      Math.abs(o.lng - e.lng) < 1.5 &&
-      Math.abs(new Date(o.timestamp).getTime() - new Date(e.timestamp).getTime()) < 43_200_000 &&
-      jaccard(o.title, e.title) > 0.35
+      Math.abs(o.lat - e.lat) < 0.8 &&
+      Math.abs(o.lng - e.lng) < 0.8 &&
+      Math.abs(new Date(o.timestamp).getTime() - new Date(e.timestamp).getTime()) < 21_600_000 &&
+      jaccard(o.title, e.title) > 0.55
     )
     if (dup) {
       if (SEV_RANK[e.severity] > SEV_RANK[dup.severity]) {

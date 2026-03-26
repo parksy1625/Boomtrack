@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server'
 import { WorldEvent, EventType, Severity } from '@/lib/types'
 import { parseRSSItems } from '@/lib/rssParser'
 
-// Vercel 함수 최대 실행시간 (hobby plan max: 60s)
-export const maxDuration = 60
+// Edge Runtime: Vercel hobby plan에서 25초 실행 (기본 serverless = 10초)
+export const runtime = 'edge'
+export const maxDuration = 25
 
 // ─────────────────────────────────────────────────────────
 // Shared helpers

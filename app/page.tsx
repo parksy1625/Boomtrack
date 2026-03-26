@@ -56,7 +56,8 @@ export default function Home() {
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
       let buf = ''
-      const merged: WorldEvent[] = []
+      // 새 배치 — 스트리밍 완료 후 기존 이벤트와 병합
+      const batch: WorldEvent[] = []
       const srcCount: Record<string, number> = {}
 
       setIsLoading(false)
@@ -72,16 +73,20 @@ export default function Home() {
           try {
             const chunk = JSON.parse(line) as { events: WorldEvent[]; source: string }
             for (const e of chunk.events) {
-              merged.push(e)
+              batch.push(e)
               srcCount[e.source] = (srcCount[e.source] ?? 0) + 1
             }
           } catch { /* 불완전한 청크 무시 */ }
         }
-        const sorted = [...merged].sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        )
-        setEvents(sorted)
-        setSources({ ...srcCount })
+        // 스트리밍 중에도 실시간으로 표시
+        setEvents(prev => {
+          const existing = new Map(prev.map(e => [e.id, e]))
+          for (const e of batch) existing.set(e.id, e)
+          return [...existing.values()].sort(
+            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+        })
+        setSources(prev => ({ ...prev, ...srcCount }))
       }
       // 스트리밍 완료 후 dedup 적용
       setEvents(prev => dedup(prev))
