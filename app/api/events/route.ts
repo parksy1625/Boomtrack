@@ -694,7 +694,7 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
   'Tunis':[36.82,10.17],'Sfax':[34.74,10.76],
   'Algiers':[36.73,3.09],'Oran':[35.70,-0.64],
   'Casablanca':[33.59,-7.62],'Rabat':[34.01,-6.83],'Marrakech':[31.63,-7.99],'Fez':[34.04,-5.00],
-  'Tripoli':[32.90,13.18],'Benghazi':[32.12,20.07],
+  'Tripoli Libya':[32.90,13.18],'Benghazi':[32.12,20.07],
   'Khartoum':[15.55,32.53],'Omdurman':[15.65,32.48],'Port Sudan':[19.62,37.22],
   // 아프리카 사하라 이남
   'Lagos':[6.45,3.40],'Abuja':[9.07,7.40],'Kano':[12.00,8.52],'Port Harcourt':[4.77,7.01],'Ibadan':[7.39,3.90],
