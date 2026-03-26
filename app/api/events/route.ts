@@ -1236,6 +1236,126 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://www.sabanews.net/rss',                           name: 'Saba News YE' },
   { url: 'https://www.libya-al-mostakbal.org/feed/',               name: 'Libya al-Mostakbal' },
   { url: 'https://www.libyaobserver.ly/feed/',                     name: 'Libya Observer' },
+
+  // ── 분쟁·안보 분석기관 ──────────────────────────────────
+  { url: 'https://understandingwar.org/feed',                      name: 'ISW' },
+  { url: 'https://www.globalsecurity.org/security.rss',            name: 'GlobalSecurity' },
+  { url: 'https://www.securitycouncilreport.org/feed/',            name: 'UN Security Council Report' },
+  { url: 'https://smallwarsjournal.com/rss.xml',                   name: 'Small Wars Journal' },
+  { url: 'https://mwi.usma.edu/feed/',                             name: 'Modern War Institute' },
+  { url: 'https://www.csis.org/rss.xml',                           name: 'CSIS' },
+  { url: 'https://www.cnas.org/rss',                               name: 'CNAS' },
+  { url: 'https://newlinesinstitute.org/feed/',                     name: 'New Lines Institute' },
+  { url: 'https://www.rusi.org/rss/rusi-news',                     name: 'RUSI' },
+  { url: 'https://www.lawfaremedia.org/feed',                      name: 'Lawfare' },
+  { url: 'https://www.justsecurity.org/feed/',                     name: 'Just Security' },
+  { url: 'https://www.mei.edu/rss.xml',                            name: 'Middle East Institute' },
+  { url: 'https://www.usip.org/rss.xml',                           name: 'USIP' },
+  { url: 'https://www.ipiinfo.com/rss/',                           name: 'International Press Institute' },
+  // ── 미국 언론 추가 ────────────────────────────────────────
+  { url: 'https://www.pbs.org/newshour/feeds/rss/world',           name: 'PBS NewsHour World' },
+  { url: 'https://www.csmonitor.com/rss/world.rss',                name: 'Christian Science Monitor' },
+  { url: 'https://worldcrunch.com/rss',                            name: 'WorldCrunch' },
+  { url: 'https://www.thenation.com/feed/',                        name: 'The Nation' },
+  { url: 'https://slate.com/feeds/all.rss',                        name: 'Slate' },
+  { url: 'https://www.democracynow.org/democracynow.rss',          name: 'Democracy Now' },
+  // ── 조직범죄·마약 추가 ──────────────────────────────────
+  { url: 'https://insightcrime.org/feed/',                         name: 'InSight Crime' },
+  { url: 'https://globalinitiative.net/rss.xml',                   name: 'Global Initiative Crime' },
+  // ── 걸프·아라비아반도 추가 ──────────────────────────────
+  { url: 'https://www.kuna.net.kw/rss/news_all.xml',               name: 'KUNA Kuwait' },
+  { url: 'https://saudigazette.com.sa/feed/',                      name: 'Saudi Gazette' },
+  { url: 'https://www.arabtimesonline.com/rss/',                   name: 'Arab Times KW' },
+  { url: 'https://www.thepeninsulaqatar.com/rss.xml',              name: 'The Peninsula QA' },
+  { url: 'https://www.muscatdaily.com/feed/',                      name: 'Muscat Daily OM' },
+  { url: 'https://www.bahrainews.net/rss.xml',                     name: 'Bahrain News' },
+  // ── WHO 지역사무소 ─────────────────────────────────────
+  { url: 'https://www.afro.who.int/rss.xml',                       name: 'WHO Africa (AFRO)' },
+  { url: 'https://www.paho.org/rss/hq/en.xml',                     name: 'PAHO Americas' },
+  { url: 'https://www.wpro.who.int/rss.xml',                       name: 'WHO Western Pacific' },
+  { url: 'https://www.emro.who.int/rss/index.xml',                 name: 'WHO Eastern Mediterranean' },
+  { url: 'https://www.euro.who.int/rss.xml',                       name: 'WHO Europe' },
+  // ── 재난·기상 추가 ─────────────────────────────────────
+  { url: 'https://volcanoes.usgs.gov/vns/rss.xml',                 name: 'USGS Volcano Alerts' },
+  { url: 'https://www.severe-weather.eu/feed/',                     name: 'Severe Weather EU' },
+  { url: 'https://www.climate.gov/news-features/rss.xml',          name: 'NOAA Climate' },
+  { url: 'https://www.preventionweb.net/feed',                     name: 'PreventionWeb' },
+  { url: 'https://www.un-spider.org/rss.xml',                      name: 'UN-SPIDER' },
+  // ── AllAfrica 지역 특화 ────────────────────────────────
+  { url: 'https://allafrica.com/tools/headlines/rss/horn-of-africa/full.rss', name: 'AllAfrica Horn of Africa' },
+  { url: 'https://allafrica.com/tools/headlines/rss/west-africa/full.rss',    name: 'AllAfrica West Africa' },
+  { url: 'https://allafrica.com/tools/headlines/rss/east-africa/full.rss',    name: 'AllAfrica East Africa' },
+  { url: 'https://allafrica.com/tools/headlines/rss/southern-africa/full.rss',name: 'AllAfrica Southern Africa' },
+  { url: 'https://allafrica.com/tools/headlines/rss/north-africa/full.rss',   name: 'AllAfrica North Africa' },
+  // ── 중국 추가 ─────────────────────────────────────────
+  { url: 'https://www.caixinglobal.com/rss/all.xml',               name: 'Caixin Global CN' },
+  { url: 'https://www.sixthtone.com/feed',                         name: 'Sixth Tone CN' },
+  { url: 'https://www.chinafile.com/feed',                         name: 'ChinaFile' },
+  // ── 인도 추가 ─────────────────────────────────────────
+  { url: 'https://www.livemint.com/rss/world.xml',                 name: 'Livemint IN' },
+  { url: 'https://www.thehindu.com/news/national/?service=rss',    name: 'The Hindu National' },
+  { url: 'https://www.indiatoday.in/rss/world.xml',                name: 'India Today World' },
+  // ── 우주·과학 추가 ────────────────────────────────────
+  { url: 'https://www.space.com/feeds/all',                        name: 'Space.com' },
+  { url: 'https://www.universetoday.com/feed/',                    name: 'Universe Today' },
+  { url: 'https://www.nasaspaceflight.com/feed/',                  name: 'NASASpaceflight' },
+  { url: 'https://arstechnica.com/space/feed/',                    name: 'Ars Technica Space' },
+  { url: 'https://www.esa.int/rssfeed/Our_Activities/Space_Safety',name: 'ESA Space Safety' },
+  { url: 'https://earthsky.org/feed/',                             name: 'EarthSky' },
+  { url: 'https://scitechdaily.com/feed/',                         name: 'SciTechDaily' },
+  // ── 북극·환경 집중 ────────────────────────────────────
+  { url: 'https://www.arctictoday.com/feed/',                      name: 'Arctic Today' },
+  { url: 'https://www.thearcticinstitute.org/feed/',               name: 'Arctic Institute' },
+  { url: 'https://www.arcticcircle.org/feed/',                     name: 'Arctic Circle' },
+  // ── 핵·에너지 추가 ────────────────────────────────────
+  { url: 'https://www.world-nuclear-news.org/rss.xml',             name: 'World Nuclear News' },
+  { url: 'https://www.power-technology.com/feed/',                 name: 'Power Technology' },
+  // ── 사이버보안 추가 ───────────────────────────────────
+  { url: 'https://www.infosecurity-magazine.com/rss/news/',        name: 'Infosecurity Magazine' },
+  { url: 'https://threatpost.com/feed/',                            name: 'Threatpost' },
+  { url: 'https://www.zdnet.com/news/rss.xml',                     name: 'ZDNet' },
+  { url: 'https://www.wired.com/feed/security/rss',                name: 'Wired Security' },
+  { url: 'https://www.hacking.news/rss/',                          name: 'Hacking News' },
+  // ── 아프가니스탄 집중 ────────────────────────────────
+  { url: 'https://www.afghanistan-analysts.org/feed/',             name: 'Afghanistan Analysts Network' },
+  { url: 'https://www.rferl.org/api/zivqrkrvil_af',               name: 'RFE/RL Afghanistan' },
+  // ── 시리아 집중 ───────────────────────────────────────
+  { url: 'https://syriadirect.org/feed/',                          name: 'Syria Direct' },
+  // ── 베네수엘라·쿠바 집중 ─────────────────────────────
+  { url: 'https://14ymedio.com/feed/',                             name: '14ymedio Cuba' },
+  { url: 'https://www.cibercuba.com/feed/',                        name: 'CiberCuba' },
+  { url: 'https://www.runrun.es/feed/',                            name: 'Runrunes VE' },
+  // ── 북한 집중 ─────────────────────────────────────────
+  { url: 'https://www.dailynk.com/english/feed/',                  name: 'Daily NK' },
+  { url: 'https://www.northkoreatech.org/feed/',                   name: 'North Korea Tech' },
+  // ── 경제·무역 기관 추가 ──────────────────────────────
+  { url: 'https://unctad.org/rss',                                 name: 'UNCTAD' },
+  { url: 'https://www.wto.org/english/news_e/rss_e/rss_e.htm',    name: 'WTO' },
+  { url: 'https://www.oecd.org/rss/',                              name: 'OECD' },
+  { url: 'https://www.g20.org/en/rss.xml',                         name: 'G20' },
+  // ── 인도주의 추가 ─────────────────────────────────────
+  { url: 'https://www.oxfam.org/en/press-room/rss.xml',            name: 'Oxfam Intl' },
+  { url: 'https://www.savethechildren.org/us/about-us/media-and-news/rss.xml', name: 'Save the Children' },
+  { url: 'https://paxforpeace.nl/feed/',                           name: 'PAX for Peace' },
+  // ── 남아시아 집중 ─────────────────────────────────────
+  { url: 'https://southasianmonitor.com/feed/',                    name: 'South Asian Monitor' },
+  { url: 'https://www.southasiadaily.com/feed/',                   name: 'South Asia Daily' },
+  // ── 동남아 집중 ───────────────────────────────────────
+  { url: 'https://asean.org/feed/',                                name: 'ASEAN Official' },
+  { url: 'https://fulcrum.sg/feed/',                               name: 'Fulcrum SG (ISEAS)' },
+  // ── 유럽 싱크탱크 추가 ────────────────────────────────
+  { url: 'https://ecfr.eu/rss/',                                   name: 'ECFR Europe' },
+  { url: 'https://www.iss.europa.eu/rss.xml',                      name: 'EU Institute for Security Studies' },
+  { url: 'https://carnegieeurope.eu/publications/rss',             name: 'Carnegie Europe' },
+  // ── 중동 싱크탱크 추가 ────────────────────────────────
+  { url: 'https://www.washingtoninstitute.org/rss/',               name: 'Washington Institute' },
+  { url: 'https://arabcenterdc.org/feed/',                         name: 'Arab Center DC' },
+  // ── 아프리카 싱크탱크 추가 ──────────────────────────
+  { url: 'https://saiia.org.za/feed/',                             name: 'SAIIA South Africa' },
+  { url: 'https://www.iiss.org/rss.xml',                           name: 'IISS' },
+  // ── 재난 경보 시스템 추가 ────────────────────────────
+  { url: 'https://www.gdacs.org/xml/rss.xml',                      name: 'GDACS All Events' },
+  { url: 'https://pdc.org/feed/',                                  name: 'PDC Alerts' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
