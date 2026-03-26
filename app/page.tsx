@@ -6,7 +6,7 @@ import Header from '@/components/Header'
 import EventFeed from '@/components/EventFeed'
 import StatsPanel from '@/components/StatsPanel'
 import EventDetail from '@/components/EventDetail'
-import { WorldEvent, EventsResponse } from '@/lib/types'
+import { WorldEvent } from '@/lib/types'
 
 const Globe3D = dynamic(() => import('@/components/Globe3D'), {
   ssr: false,
@@ -47,13 +47,40 @@ export default function Home() {
     try {
       const res = await fetch('/api/events')
       if (!res.ok) return
-      const data: EventsResponse = await res.json()
-      setEvents(data.events)
-      setSources(data.sources ?? {})
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let buf = ''
+      const merged: WorldEvent[] = []
+      const srcCount: Record<string, number> = {}
+
+      setIsLoading(false)
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buf += decoder.decode(value, { stream: true })
+        const lines = buf.split('\n')
+        buf = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const chunk = JSON.parse(line) as { events: WorldEvent[]; source: string }
+            for (const e of chunk.events) {
+              merged.push(e)
+              srcCount[e.source] = (srcCount[e.source] ?? 0) + 1
+            }
+          } catch { /* 불완전한 청크 무시 */ }
+        }
+        // 완료된 소스마다 즉시 화면 업데이트
+        const sorted = [...merged].sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        )
+        setEvents(sorted)
+        setSources({ ...srcCount })
+      }
       setLastUpdate(new Date())
     } catch {
       // network error — keep last state
-    } finally {
       setIsLoading(false)
     }
   }, [])

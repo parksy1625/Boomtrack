@@ -2161,37 +2161,34 @@ export async function GET() {
     ...NEWS_FEEDS.map(f => fetchNewsFeed(f.url, f.name)),
   ]
 
-  const settled = await Promise.allSettled(tasks)
-
-  const allEvents: WorldEvent[] = settled
-    .filter(r => r.status === 'fulfilled')
-    .flatMap(r => (r as PromiseFulfilledResult<WorldEvent[]>).value)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-
-  const sources: Record<string, number> = {}
-  for (const e of allEvents) sources[e.source] = (sources[e.source] ?? 0) + 1
-
   const SOURCE_NAMES = [
     'USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
     'FEMA','FloodList','WHO','PTWC','IAEA',
     ...NEWS_FEEDS.map(f => f.name),
   ]
 
-  const failedSources: Record<string, string> = {}
-  settled.forEach((r, i) => {
-    if (r.status === 'rejected') {
-      const reason = (r as PromiseRejectedResult).reason
-      const msg = reason instanceof Error ? reason.message : String(reason)
-      failedSources[SOURCE_NAMES[i]] = msg
-      console.warn(`[BoomTrack] ${SOURCE_NAMES[i]} 실패:`, reason)
-    }
+  const enc = new TextEncoder()
+
+  // 스트리밍: 각 소스가 완료되는 즉시 청크 전송
+  const stream = new ReadableStream({
+    async start(controller) {
+      const namedTasks = tasks.map((task, i) =>
+        task
+          .then(events => ({ events, source: SOURCE_NAMES[i] }))
+          .catch(err => {
+            console.warn(`[BoomTrack] ${SOURCE_NAMES[i]} 실패:`, err)
+            return { events: [] as WorldEvent[], source: SOURCE_NAMES[i] }
+          })
+          .then(chunk => {
+            controller.enqueue(enc.encode(JSON.stringify(chunk) + '\n'))
+          })
+      )
+      await Promise.all(namedTasks)
+      controller.close()
+    },
   })
 
-  return NextResponse.json({
-    events: allEvents,
-    total: allEvents.length,
-    lastUpdate: new Date().toISOString(),
-    sources,
-    failedSources,
+  return new Response(stream, {
+    headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8' },
   })
 }
