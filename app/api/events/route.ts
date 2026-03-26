@@ -1345,6 +1345,49 @@ const COUNTRY_COORDS: Record<string, readonly [number, number]> = {
   'Pacific':[0,170],'Arctic':[80,0],'Antarctic':[-80,0],
 }
 
+/** 나라별 안전 지터 반경 (도) — 나라 크기에 비례, 경계 밖 이탈 방지 */
+const COUNTRY_JITTER: Record<string, number> = {
+  // 초소형 (< 100 km): ≤ 0.3°
+  Monaco:0.1,Singapore:0.2,'San Marino':0.2,Liechtenstein:0.2,
+  Malta:0.3,Maldives:0.2,Bahrain:0.3,Comoros:0.3,
+  // 소형 (100–500 km): 0.5–1°
+  Luxembourg:0.4,Lebanon:0.8,Israel:1.0,Palestine:0.6,Kuwait:0.8,
+  Djibouti:0.8,Gambia:0.5,Togo:0.8,Benin:0.8,Rwanda:0.5,Burundi:0.5,
+  Lesotho:0.5,Eswatini:0.5,Haiti:0.8,Jamaica:0.5,Cyprus:0.5,Taiwan:1.0,
+  'Timor-Leste':0.6,'East Timor':0.6,Kosovo:0.5,Montenegro:0.5,
+  'Sierra Leone':1.0,
+  // 중소형 (500–1500 km): 1–2°
+  'South Korea':1.5,'North Korea':1.5,Jordan:1.5,Syria:1.5,
+  Austria:1.5,Hungary:1.5,Slovakia:1.0,Czechia:1.5,'Czech Republic':1.5,
+  Slovenia:0.8,Croatia:1.5,Belgium:0.8,Netherlands:1.0,Switzerland:1.0,
+  Portugal:1.5,Greece:1.5,Bulgaria:1.5,Serbia:1.0,Albania:0.8,
+  'North Macedonia':0.8,Lithuania:1.0,Latvia:1.0,Estonia:0.8,
+  'Bosnia and Herzegovina':1.0,Eritrea:1.0,Liberia:1.0,
+  // 중형 (1500–3000 km): 2–3°
+  Romania:2.0,Poland:2.0,Germany:2.0,Italy:2.0,France:2.0,Spain:2.5,
+  'United Kingdom':2.0,UK:2.0,Britain:2.0,Ukraine:2.5,Turkey:3.0,
+  Japan:2.5,'New Zealand':2.5,Morocco:2.5,Tunisia:1.5,
+  Iraq:2.0,Iran:3.0,'Saudi Arabia':3.0,Egypt:2.5,
+  Norway:3.0,Sweden:2.5,Finland:2.5,
+  // 대형 (3000–5000 km): 3–5°
+  India:4.0,Pakistan:2.5,Indonesia:4.0,Mexico:4.0,
+  Nigeria:2.5,Ethiopia:2.5,Tanzania:2.5,Sudan:3.0,
+  'South Africa':3.0,Mozambique:2.5,Angola:3.0,Zambia:2.0,Zimbabwe:2.0,
+  DRC:3.5,'Democratic Republic of the Congo':3.5,Congo:2.0,
+  Algeria:3.5,Libya:3.0,Chad:3.0,Mali:3.5,Niger:3.0,
+  Afghanistan:2.5,
+  // 초대형 (> 5000 km): 5–8°
+  Russia:8.0,Canada:8.0,'United States':6.0,US:6.0,USA:6.0,
+  China:5.5,Australia:5.5,Brazil:5.5,Argentina:4.5,Kazakhstan:4.5,Mongolia:4.0,
+  // 대륙/광역
+  'South America':7.0,'North America':7.0,'Latin America':7.0,
+  'Middle East':4.0,'Southeast Asia':4.0,'Central Asia':4.0,
+  'East Africa':4.0,'West Africa':4.0,'Central Africa':4.0,
+  'Sub-Saharan Africa':7.0,'Eastern Europe':5.0,'Western Europe':4.0,
+  Europe:5.0,Africa:7.0,Asia:7.0,Americas:7.0,Pacific:7.0,
+  Arctic:3.0,Antarctic:3.0,
+}
+
 const RW_TYPE: Record<string, EventType> = {
   Flood:'weather',Storm:'weather',Drought:'weather','Cold Wave':'weather',
   'Heat Wave':'weather','Tropical Cyclone':'weather',Earthquake:'earthquake',
@@ -1372,8 +1415,9 @@ async function fetchReliefWeb(): Promise<WorldEvent[]> {
     const countryName: string = f.country?.[0]?.name ?? ''
     const coords = COUNTRY_COORDS[countryName]
     if (!coords) continue
-    const lat = coords[0] + (Math.random() - 0.5) * 4
-    const lng = coords[1] + (Math.random() - 0.5) * 4
+    const rj = COUNTRY_JITTER[countryName] ?? 2.5
+    const lat = coords[0] + (Math.random() - 0.5) * rj
+    const lng = coords[1] + (Math.random() - 0.5) * rj * 1.6
     const typeName: string = f.primary_type?.name ?? 'Other'
     events.push({
       id: `rw-${item.id}`,
@@ -2190,7 +2234,7 @@ interface _Candidate {
 const _CTX_RE = /\b(?:city of|capital of|province of|region of|state of|port of|district of|in the city of|town of)\s+([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:\s+[A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})|([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:\s+[A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})\s+(?:province|state|oblast|district|prefecture|governorate|region|county|municipality|city)\b/gi
 
 /** 텍스트에서 위치 추출 — 점수 기반 다중후보 선택
- *  순서: 데이트라인(즉시) → 컨텍스트(15) → 전치사(12) → 전문스캔(빈도×4) → 지역(1.0°) → 국가(1.5°)
+ *  순서: 데이트라인(즉시) → 컨텍스트(15) → 전치사(12) → 전문스캔(빈도×4) → 지역(3.0°) → 국가(COUNTRY_JITTER)
  *  반환: [lat, lng, 장소명, jitter반경(도)] */
 function coordsFromText(text: string): readonly [number, number, string, number] | null {
   const lower = text.toLowerCase()
@@ -2242,9 +2286,9 @@ function coordsFromText(text: string): readonly [number, number, string, number]
     if (lower.includes(name.toLowerCase())) return [c[0], c[1], name, 3.0]
   }
 
-  // 6. 국가 폴백
+  // 6. 국가 폴백 — 나라 크기별 안전 지터 적용
   for (const [name, c] of Object.entries(COUNTRY_COORDS)) {
-    if (text.includes(name)) return [c[0], c[1], name, 5.0]
+    if (text.includes(name)) return [c[0], c[1], name, COUNTRY_JITTER[name] ?? 2.5]
   }
   return null
 }
