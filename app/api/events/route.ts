@@ -773,6 +773,134 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
   'Perth':[-31.95,115.86],'Adelaide':[-34.93,138.60],'Canberra':[-35.28,149.13],
   'Auckland':[-36.85,174.76],'Wellington':[-41.29,174.78],'Christchurch':[-43.53,172.64],
   'Suva':[-18.14,178.44],'Port Moresby':[-9.44,147.18],'Honiara':[-9.43,160.05],
+  // 우크라이나 전선 도시
+  'Donetsk':[48.01,37.80],'Luhansk':[48.57,39.34],'Bakhmut':[48.60,38.00],
+  'Avdiivka':[48.14,37.75],'Mariupol':[47.11,37.54],'Sevastopol':[44.60,33.52],
+  'Mykolaiv':[46.97,32.00],'Sumy':[50.91,34.80],'Chernihiv':[51.49,31.29],
+  'Kramatorsk':[48.73,37.56],'Sloviansk':[48.87,37.63],'Kherson':[46.64,32.62],
+  'Zaporizhzhia':[47.84,35.14],'Melitopol':[46.85,35.37],
+  // 러시아 국경지역
+  'Belgorod':[50.60,36.59],'Kursk':[51.73,36.19],'Bryansk':[53.25,34.37],
+  'Voronezh':[51.67,39.18],'Rostov-on-Don':[47.23,39.72],'Krasnodar':[45.04,38.98],
+  // 중국 추가 도시
+  'Nanjing':[32.06,118.78],"Xi'an":[34.27,108.95],'Harbin':[45.75,126.65],
+  'Shenyang':[41.79,123.43],'Jinan':[36.67,117.00],'Qingdao':[36.07,120.38],
+  'Zhengzhou':[34.76,113.65],'Changsha':[28.23,112.94],'Fuzhou':[26.07,119.30],
+  'Kunming':[25.04,102.71],'Nanchang':[28.68,115.88],'Hefei':[31.86,117.28],
+  'Xiamen':[24.48,118.08],'Urumqi':[43.83,87.63],'Lanzhou':[36.06,103.79],
+  'Changchun':[43.88,125.35],'Taiyuan':[37.87,112.55],'Guiyang':[26.58,106.71],
+  'Nanning':[22.82,108.32],'Hohhot':[40.82,111.66],'Lhasa':[29.65,91.13],
+  // 인도 추가 도시
+  'Surat':[21.17,72.83],'Lucknow':[26.85,80.95],'Kanpur':[26.47,80.33],
+  'Nagpur':[21.15,79.09],'Patna':[25.61,85.14],'Indore':[22.72,75.86],
+  'Bhopal':[23.26,77.40],'Vadodara':[22.31,73.19],'Agra':[27.18,78.00],
+  'Ludhiana':[30.90,75.85],'Nashik':[19.99,73.79],'Meerut':[28.98,77.71],
+  'Varanasi':[25.32,83.01],'Srinagar':[34.09,74.80],'Amritsar':[31.64,74.87],
+  'Visakhapatnam':[17.69,83.23],'Coimbatore':[11.00,76.96],'Kochi':[9.93,76.27],
+  // 미국 추가 도시
+  'Austin':[30.27,-97.74],'Charlotte':[35.23,-80.84],'Raleigh':[35.78,-78.64],
+  'Memphis':[35.15,-90.05],'Louisville':[38.25,-85.76],'Richmond':[37.54,-77.43],
+  'Indianapolis':[39.77,-86.16],'Columbus':[39.96,-82.99],'Detroit':[42.33,-83.05],
+  'Kansas City':[39.10,-94.58],'Salt Lake City':[40.76,-111.89],'Tucson':[32.22,-110.97],
+  'Sacramento':[38.58,-121.49],'San Jose':[37.34,-121.89],'Fort Worth':[32.75,-97.33],
+  'El Paso':[31.76,-106.49],'Jacksonville':[30.33,-81.66],'Milwaukee':[43.04,-87.91],
+  'Albuquerque':[35.08,-106.65],'Omaha':[41.26,-95.93],'Honolulu':[21.31,-157.86],
+  'Anchorage':[61.22,-149.90],'Tampa':[27.95,-82.46],'Pittsburgh':[40.44,-79.99],
+  'Cincinnati':[39.10,-84.51],'St. Louis':[38.63,-90.20],'Cleveland':[41.50,-81.69],
+  // 영국 추가 도시
+  'Leeds':[53.80,-1.55],'Sheffield':[53.38,-1.47],'Liverpool':[53.41,-2.98],
+  'Bristol':[51.45,-2.59],'Edinburgh':[55.95,-3.19],'Cardiff':[51.48,-3.18],
+  'Newcastle':[54.97,-1.62],'Leicester':[52.64,-1.13],'Nottingham':[52.95,-1.15],
+  // 독일 추가 도시
+  'Stuttgart':[48.78,9.18],'Dresden':[51.05,13.74],'Leipzig':[51.34,12.37],
+  'Hannover':[52.37,9.73],'Nuremberg':[49.45,11.08],'Bremen':[53.08,8.80],
+  'Düsseldorf':[51.23,6.78],'Dortmund':[51.52,7.47],'Essen':[51.46,7.01],
+  // 프랑스 추가 도시
+  'Nice':[43.70,7.26],'Bordeaux':[44.84,-0.58],'Strasbourg':[48.58,7.75],
+  'Nantes':[47.22,-1.55],'Lille':[50.63,3.07],'Rennes':[48.11,-1.68],
+  // 이탈리아 추가 도시
+  'Florence':[43.77,11.26],'Venice':[45.44,12.33],'Bologna':[44.49,11.34],
+  'Palermo':[38.13,13.33],'Genoa':[44.41,8.93],'Catania':[37.50,15.09],
+  // 이스라엘·팔레스타인 세부
+  'Rafah':[31.29,34.25],'Khan Yunis':[31.34,34.30],'Nablus':[32.22,35.26],
+  'Jenin':[32.46,35.30],'Beer Sheva':[31.25,34.79],'Ashdod':[31.80,34.65],
+  // 이란 추가
+  'Tabriz':[38.07,46.30],'Shiraz':[29.62,52.53],'Ahvaz':[31.32,48.67],'Qom':[34.64,50.88],
+  // 이라크 추가
+  'Kirkuk':[35.47,44.39],'Najaf':[32.02,44.34],'Karbala':[32.61,44.02],'Sulaymaniyah':[35.56,45.43],
+  // 시리아 추가
+  'Hama':[35.13,36.75],'Deir ez-Zor':[35.33,40.14],'Raqqa':[35.95,39.01],'Latakia':[35.52,35.79],
+  // 예멘 추가
+  'Taiz':[13.58,44.02],'Ibb':[13.97,44.18],'Marib':[15.46,45.33],
+  // 미얀마 추가
+  'Meiktila':[20.87,95.86],'Myitkyina':[25.38,97.39],'Sittwe':[20.15,92.90],
+  // 에티오피아 추가
+  'Mekelle':[13.49,39.47],'Gondar':[12.60,37.47],'Hawassa':[7.06,38.47],
+  // 수단 추가
+  'El Fasher':[13.63,25.35],'El Obeid':[13.18,30.22],'Kassala':[15.45,36.40],
+  // 사헬 지역
+  'Maiduguri':[11.84,13.16],'Sokoto':[13.06,5.24],'Gao':[16.27,-0.04],'Timbuktu':[16.77,-3.00],
+  // 남미 추가
+  'Medellín':[6.25,-75.56],'Barranquilla':[10.96,-74.80],'Cartagena':[10.40,-75.51],
+  'Maracaibo':[10.67,-71.61],'Valencia':[10.18,-68.00],'Barquisimeto':[10.07,-69.32],
+  'Cochabamba':[-17.39,-66.16],'Sucre':[-19.05,-65.26],
+  'Guayaquil':[-2.19,-79.89],'Cuenca':[-2.90,-79.00],
+  'Trujillo':[-8.11,-79.02],'Chiclayo':[-6.78,-79.84],'Iquitos':[-3.74,-73.25],
+  'Mendoza':[-32.89,-68.83],'Tucumán':[-26.82,-65.22],'Mar del Plata':[-38.00,-57.55],
+  'Concepción':[-36.82,-73.05],'Antofagasta':[-23.65,-70.40],
+}
+
+/** 주·도·지역 단위 좌표 DB (도시보다 넓고 국가보다 좁은 중간 레이어) */
+const REGION_COORDS: Record<string, readonly [number, number]> = {
+  // 미국 주
+  'California':[36.78,-119.42],'Texas':[31.97,-99.90],'Florida':[27.99,-81.76],
+  'New York':[42.97,-75.52],'Pennsylvania':[41.20,-77.19],'Illinois':[40.35,-88.99],
+  'Ohio':[40.41,-82.71],'Georgia':[32.16,-82.90],'North Carolina':[35.63,-79.81],
+  'Michigan':[44.31,-85.60],'New Jersey':[40.06,-74.41],'Virginia':[37.93,-79.02],
+  'Washington':[47.51,-120.74],'Arizona':[34.04,-111.09],'Massachusetts':[42.41,-71.38],
+  'Tennessee':[35.86,-86.35],'Indiana':[40.27,-86.13],'Missouri':[38.46,-92.29],
+  'Maryland':[39.05,-76.64],'Wisconsin':[44.27,-89.62],'Colorado':[39.55,-105.78],
+  'Minnesota':[46.39,-94.64],'South Carolina':[33.84,-81.16],'Alabama':[32.32,-86.90],
+  'Louisiana':[31.07,-91.96],'Kentucky':[37.67,-84.67],'Oregon':[44.57,-122.07],
+  'Oklahoma':[35.57,-96.93],'Connecticut':[41.60,-72.72],'Utah':[39.32,-111.09],
+  'Iowa':[42.03,-93.21],'Nevada':[38.80,-116.42],'Arkansas':[34.97,-92.37],
+  'Mississippi':[32.74,-89.67],'Kansas':[38.53,-96.73],'Nebraska':[41.49,-99.90],
+  'Idaho':[44.24,-114.48],'Montana':[46.88,-110.36],'Alaska':[64.20,-153.37],
+  // 인도 주
+  'Uttar Pradesh':[26.85,80.91],'Maharashtra':[19.66,75.31],'Bihar':[25.09,85.31],
+  'West Bengal':[22.98,87.85],'Madhya Pradesh':[23.47,77.95],'Tamil Nadu':[11.13,78.66],
+  'Rajasthan':[27.02,74.21],'Karnataka':[15.32,75.71],'Gujarat':[22.26,71.19],
+  'Andhra Pradesh':[15.91,79.74],'Odisha':[20.94,84.80],'Telangana':[17.86,79.01],
+  'Kerala':[10.85,76.27],'Jharkhand':[23.61,85.28],'Assam':[26.20,92.93],
+  'Punjab':[31.15,75.34],'Haryana':[29.06,76.08],'Uttarakhand':[30.07,79.02],
+  'Jammu':[32.73,74.87],'Kashmir':[34.08,74.80],
+  // 중국 성
+  'Guangdong':[23.37,113.50],'Shandong':[36.67,118.00],'Henan':[34.29,113.74],
+  'Sichuan':[30.66,102.88],'Jiangsu':[32.97,119.46],'Hubei':[30.96,112.27],
+  'Hunan':[27.62,111.72],'Anhui':[31.86,117.28],'Hebei':[38.04,114.51],
+  'Zhejiang':[29.18,120.10],'Yunnan':[24.47,101.35],'Shaanxi':[35.20,108.94],
+  'Liaoning':[41.30,122.60],'Heilongjiang':[47.86,127.74],'Shanxi':[37.87,112.55],
+  'Xinjiang':[43.83,87.63],'Tibet':[29.65,91.13],'Hainan':[19.20,109.74],
+  // 러시아 지역
+  'Siberia':[60.00,100.00],'Ural':[58.00,60.00],'Far East':[55.00,135.00],
+  'Chechnya':[43.40,45.71],'Dagestan':[42.47,47.10],'Tatarstan':[55.79,49.12],
+  // 독일 주
+  'Bavaria':[48.92,11.41],'Saxony':[51.10,13.20],'Brandenburg':[52.41,12.53],
+  'Thuringia':[50.91,11.00],'Hesse':[50.65,8.99],'North Rhine-Westphalia':[51.43,7.66],
+  // 영국 지역
+  'Scotland':[56.49,-4.20],'Wales':[52.13,-3.78],'Northern Ireland':[54.60,-6.76],
+  'Yorkshire':[53.96,-1.08],'Lancashire':[53.76,-2.70],'Midlands':[52.48,-1.90],
+  // 우크라이나 주
+  'Donbas':[48.00,38.00],'Crimea':[44.95,34.10],'Kharkiv Oblast':[49.90,36.50],
+  // 중동 지역
+  'West Bank':[31.95,35.30],'Gaza Strip':[31.35,34.35],
+  'Kurdistan':[36.80,44.60],'Sinai':[29.86,34.04],
+  // 아프리카 지역
+  'Sahel':[15.00,0.00],'Darfur':[13.50,24.50],'Tigray':[13.90,38.50],
+  'Sahara':[23.00,12.00],'Katanga':[-9.00,26.00],
+  // 동남아 지역
+  'Mindanao':[7.87,124.86],'Luzon':[16.00,121.00],'Sumatra':[0.59,101.34],
+  'Borneo':[1.00,114.00],'Papua':[-4.00,136.00],
 }
 
 /** 텍스트에서 위치 추출 (뉴스 데이트라인 → 도시 → 국가 순)
@@ -791,9 +919,14 @@ function coordsFromText(text: string): readonly [number, number, string, number]
   for (const [name, c] of sortedCities) {
     if (text.includes(name)) return [c[0], c[1], name, 0.12]
   }
-  // 3. 국가명 폴백
+  // 3. 주·도·지역 중간 레이어
+  const sortedRegions = Object.entries(REGION_COORDS).sort((a, b) => b[0].length - a[0].length)
+  for (const [name, c] of sortedRegions) {
+    if (text.includes(name)) return [c[0], c[1], name, 1.0]
+  }
+  // 4. 국가명 폴백 (jitter 축소)
   for (const [name, c] of Object.entries(COUNTRY_COORDS)) {
-    if (text.includes(name)) return [c[0], c[1], name, 2.5]
+    if (text.includes(name)) return [c[0], c[1], name, 1.5]
   }
   return null
 }
