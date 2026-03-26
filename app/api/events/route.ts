@@ -339,6 +339,67 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',          name: 'NASA' },
   { url: 'https://spaceweather.com/services/rss.xml',               name: 'Space Weather' },
   { url: 'https://www.spaceweatherlive.com/en/news/rss.xml',        name: 'SpaceWeatherLive' },
+  // ── 글로벌 주요 언론 추가 ────────────────────────────────
+  { url: 'https://feeds.washingtonpost.com/rss/world',              name: 'Washington Post' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',  name: 'NY Times World' },
+  { url: 'https://feeds.a.dj.com/rss/RSSWorldNews.xml',            name: 'Wall Street Journal' },
+  { url: 'https://www.ft.com/rss/home/uk',                         name: 'Financial Times' },
+  { url: 'https://www.economist.com/international/rss.xml',         name: 'The Economist' },
+  { url: 'https://foreignpolicy.com/feed/',                         name: 'Foreign Policy' },
+  { url: 'https://www.foreignaffairs.com/rss.xml',                  name: 'Foreign Affairs' },
+  { url: 'https://theintercept.com/feed/?rss',                      name: 'The Intercept' },
+  // ── 러시아·구소련 ────────────────────────────────────────
+  { url: 'https://www.themoscowtimes.com/rss/news',                 name: 'Moscow Times' },
+  { url: 'https://www.kavkaz-uzel.eu/articles/rss.xml',             name: 'Kavkaz-Uzel (Caucasus)' },
+  { url: 'https://www.ukraine-crisis.info/feed/',                   name: 'Ukraine Crisis' },
+  { url: 'https://www.pravda.com.ua/eng/rss/view_news/',            name: 'Ukrayinska Pravda' },
+  // ── 동아시아 추가 ────────────────────────────────────────
+  { url: 'https://www.rfa.org/english/rss2.xml',                    name: 'Radio Free Asia' },
+  { url: 'https://www.taipeitimes.com/xml/index.rss',               name: 'Taipei Times' },
+  { url: 'https://en.hani.co.kr/rss',                               name: 'Hankyoreh' },
+  { url: 'https://asia.nikkei.com/rss/feed/nar',                    name: 'Nikkei Asia' },
+  { url: 'https://www.rfa.org/english/news/china/rss2.xml',         name: 'RFA China' },
+  { url: 'https://www.rfa.org/english/news/nkorea/rss2.xml',        name: 'RFA N.Korea' },
+  // ── 남아시아 추가 ────────────────────────────────────────
+  { url: 'https://www.thequint.com/news/rss',                       name: 'The Quint' },
+  { url: 'https://www.thenews.com.pk/rss/1/2',                      name: 'The News PK' },
+  { url: 'https://www.samaa.tv/feed/',                              name: 'Samaa TV' },
+  { url: 'https://tolonews.com/rss.xml',                            name: 'Tolo News (Afghanistan)' },
+  { url: 'https://www.khaama.com/feed/',                            name: 'Khaama (Afghanistan)' },
+  // ── 중동 추가 ────────────────────────────────────────────
+  { url: 'https://english.wafa.ps/rss.aspx',                       name: 'WAFA (Palestine)' },
+  { url: 'https://www.iranintl.com/en/rss',                         name: 'Iran International' },
+  { url: 'https://www.tasnimnews.com/en/rss',                       name: 'Tasnim (Iran)' },
+  { url: 'https://www.kurdistan24.net/en/rss.xml',                  name: 'Kurdistan 24' },
+  { url: 'https://www.yementimes.com/en/rss.xml',                   name: 'Yemen Times' },
+  // ── 아프리카 추가 ────────────────────────────────────────
+  { url: 'https://www.dw.com/en/africa/rss',                        name: 'DW Africa' },
+  { url: 'https://www.theafricareport.com/feed/',                   name: 'Africa Report' },
+  { url: 'https://www.voaafrica.com/api/zivqrkrvil',                name: 'VOA Africa' },
+  { url: 'https://www.sabcnews.com/sabcnews/feed/',                  name: 'SABC News' },
+  { url: 'https://www.monitor.co.ug/monitor/feed',                  name: 'Daily Monitor UG' },
+  { url: 'https://www.ghanaweb.com/GhanaHomePage/rss.php',          name: 'GhanaWeb' },
+  { url: 'https://www.ethiopiaobserver.com/feed/',                  name: 'Ethiopia Observer' },
+  // ── 중남미 추가 ────────────────────────────────────────
+  { url: 'https://www.venezuelanalysis.com/feed',                   name: 'Venezuela Analysis' },
+  { url: 'https://lacuarta.com/rss/',                               name: 'La Cuarta CL' },
+  { url: 'https://www.nodal.am/feed/',                              name: 'NODAL LatAm' },
+  { url: 'https://www.brasildefato.com.br/rss.xml',                 name: 'Brasil de Fato' },
+  // ── 기후·환경 추가 ───────────────────────────────────────
+  { url: 'https://www.climatechangenews.com/feed/',                 name: 'Climate Change News' },
+  { url: 'https://insideclimatenews.org/feed/',                     name: 'Inside Climate News' },
+  { url: 'https://www.carbonbrief.org/feed',                        name: 'Carbon Brief' },
+  { url: 'https://e360.yale.edu/feed',                              name: 'Yale Environment 360' },
+  // ── 사이버·기술 안보 ────────────────────────────────────
+  { url: 'https://krebsonsecurity.com/feed/',                       name: 'Krebs on Security' },
+  { url: 'https://therecord.media/feed',                            name: 'The Record (Cyber)' },
+  { url: 'https://www.securityweek.com/feed/',                      name: 'SecurityWeek' },
+  // ── 국제기구 추가 ───────────────────────────────────────
+  { url: 'https://www.unocha.org/feed',                             name: 'OCHA' },
+  { url: 'https://www.unhcr.org/en-us/news/press/rss.xml',         name: 'UNHCR Press' },
+  { url: 'https://www.unicef.org/press-releases/rss.xml',          name: 'UNICEF' },
+  { url: 'https://www.ohchr.org/en/rss-feeds/news',                name: 'OHCHR' },
+  { url: 'https://www.transparency.org/en/feed',                   name: 'Transparency Intl' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
