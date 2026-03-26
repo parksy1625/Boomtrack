@@ -172,18 +172,35 @@ function typeFromText(text: string): EventType {
 }
 
 const NEWS_FEEDS: Array<{ url: string; name: string }> = [
-  // 기존 4개
+  // ── 서유럽·미국 ──────────────────────────────────────────
   { url: 'https://feeds.reuters.com/Reuters/worldNews',                name: 'Reuters' },
-  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',               name: 'BBC' },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml',                  name: 'Al Jazeera' },
-  { url: 'https://rss.dw.com/xml/rss-en-world',                        name: 'DW' },
-  // 신규 6개
-  { url: 'https://www.theguardian.com/world/rss',                      name: 'Guardian' },
-  { url: 'https://www.france24.com/en/rss',                            name: 'France 24' },
-  { url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml',     name: 'UN News' },
-  { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/rss.xml',      name: 'NHK World' },
   { url: 'https://feeds.reuters.com/reuters/businessNews',             name: 'Reuters Business' },
   { url: 'https://feeds.reuters.com/reuters/healthNews',               name: 'Reuters Health' },
+  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',               name: 'BBC' },
+  { url: 'https://www.theguardian.com/world/rss',                      name: 'Guardian' },
+  { url: 'https://rss.dw.com/xml/rss-en-world',                        name: 'DW' },
+  { url: 'https://www.euronews.com/rss?format=mrss',                   name: 'Euronews' },
+  { url: 'https://www.france24.com/en/rss',                            name: 'France 24' },
+  // ── 북미 ─────────────────────────────────────────────────
+  { url: 'https://www.cbc.ca/cmlink/rss-world',                        name: 'CBC Canada' },
+  // ── 중동·아랍 ────────────────────────────────────────────
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml',                  name: 'Al Jazeera' },
+  { url: 'https://www.arabnews.com/rss.xml',                           name: 'Arab News' },
+  { url: 'https://www.trtworld.com/rss',                               name: 'TRT World' },
+  // ── 아시아·태평양 ────────────────────────────────────────
+  { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/rss.xml',      name: 'NHK World' },
+  { url: 'https://japantimes.co.jp/rss.xml',                           name: 'Japan Times' },
+  { url: 'https://en.yna.co.kr/RSS/news.xml',                          name: 'Yonhap' },
+  { url: 'https://www.abc.net.au/news/feed/51120/rss.xml',             name: 'ABC Australia' },
+  { url: 'https://www.bangkokpost.com/rss/data/world.xml',             name: 'Bangkok Post' },
+  // ── 남아시아 ─────────────────────────────────────────────
+  { url: 'https://www.thehindu.com/news/international/?service=rss',   name: 'The Hindu' },
+  { url: 'https://timesofindia.indiatimes.com/rss/world.cms',          name: 'Times of India' },
+  { url: 'https://www.dawn.com/feeds/latest-news',                     name: 'Dawn' },
+  // ── 아프리카 ─────────────────────────────────────────────
+  { url: 'https://allafrica.com/tools/headlines/rss/latest/full.rss',  name: 'AllAfrica' },
+  // ── 국제기구 ─────────────────────────────────────────────
+  { url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml',     name: 'UN News' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
