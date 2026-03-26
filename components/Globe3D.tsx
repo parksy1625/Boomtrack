@@ -165,7 +165,7 @@ export default function Globe3D({ events, onEventClick }: Props) {
         debounce = setTimeout(() => {
           lastAlt = altitude
           recluster(globe)
-        }, 30)
+        }, 5)
       })
 
       const obs = new ResizeObserver(() => {
