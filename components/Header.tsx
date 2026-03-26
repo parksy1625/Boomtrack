@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 interface Props {
   eventCount: number
-  lastUpdate: Date
+  lastUpdate: Date | null
   isLoading: boolean
   criticalCount: number
 }
@@ -64,14 +64,16 @@ export default function Header({ eventCount, lastUpdate, isLoading, criticalCoun
           <span className="hidden sm:inline">건</span>
         </div>
 
-        <div className="text-gray-600 hidden md:block">
-          갱신{' '}
-          {lastUpdate.toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          })}
-        </div>
+        {lastUpdate && (
+          <div className="text-gray-600 hidden md:block">
+            갱신{' '}
+            {lastUpdate.toLocaleTimeString('ko-KR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })}
+          </div>
+        )}
       </div>
     </header>
   )

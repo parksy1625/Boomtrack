@@ -42,7 +42,7 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<WorldEvent | null>(null)
   const [clusterEvents, setClusterEvents] = useState<WorldEvent[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [mobileTab, setMobileTab] = useState<MobileTab>('globe')
 
   const fetchEvents = useCallback(async () => {
@@ -88,6 +88,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    setLastUpdate(new Date())
     fetchEvents()
     const id = setInterval(fetchEvents, REFRESH_INTERVAL)
     return () => clearInterval(id)
