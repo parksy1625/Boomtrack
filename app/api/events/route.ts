@@ -237,6 +237,63 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://thediplomat.com/feed/',                              name: 'The Diplomat' },
   { url: 'https://www.thehindu.com/sci-tech/health/feeder/default.rss', name: 'The Hindu Health' },
   { url: 'https://tribune.com.pk/feed',                                name: 'Express Tribune' },
+  // ── 동유럽·러시아 ────────────────────────────────────────
+  { url: 'https://meduza.io/rss/en/all',                              name: 'Meduza' },
+  { url: 'https://www.euractiv.com/sections/all/feed/',               name: 'Euractiv' },
+  { url: 'https://balkaninsight.com/feed/',                           name: 'Balkan Insight' },
+  { url: 'https://notesfrompoland.com/feed/',                         name: 'Notes from Poland' },
+  { url: 'https://rss.dw.com/xml/rss_en_europe',                     name: 'DW Europe' },
+  { url: 'https://rss.dw.com/xml/rss-en-eu',                         name: 'DW EU' },
+  { url: 'https://eng.belta.by/rss/',                                 name: 'BELTA Belarus' },
+  { url: 'https://www.azernews.az/rss/news.xml',                      name: 'AzerNews' },
+  { url: 'https://jam-news.net/feed/',                                name: 'JAM News' },
+  // ── 동남아시아 추가 ──────────────────────────────────────
+  { url: 'https://www.thejakartapost.com/rss/news.xml',               name: 'Jakarta Post' },
+  { url: 'https://vietnamnews.vn/rss/latest.rss',                     name: 'Vietnam News' },
+  { url: 'https://www.philstar.com/rss/realtime',                     name: 'Philippine Star' },
+  { url: 'https://www.mizzima.com/feed',                              name: 'Mizzima (Myanmar)' },
+  { url: 'https://www.irrawaddy.com/feed',                            name: 'Irrawaddy (Myanmar)' },
+  { url: 'https://www.khmertimeskh.com/feed/',                        name: 'Khmer Times' },
+  { url: 'https://phnompenhpost.com/rss.xml',                         name: 'Phnom Penh Post' },
+  // ── 남아시아 추가 ────────────────────────────────────────
+  { url: 'https://www.thedailystar.net/rss.xml',                      name: 'Daily Star BD' },
+  { url: 'https://www.geo.tv/rss/',                                   name: 'Geo News' },
+  { url: 'https://www.newsfirst.lk/feed/',                            name: 'NewsFirst LK' },
+  { url: 'https://www.dailymirror.lk/rss/',                           name: 'Daily Mirror LK' },
+  { url: 'https://kathmandupost.com/rss',                             name: 'Kathmandu Post' },
+  // ── 아프리카 추가 ────────────────────────────────────────
+  { url: 'https://www.africanews.com/feed/rss/',                      name: 'Africanews' },
+  { url: 'https://www.dailymaverick.co.za/rss.xml',                   name: 'Daily Maverick' },
+  { url: 'https://www.theafricareport.com/feed/',                     name: 'Africa Report' },
+  { url: 'https://www.nation.co.ke/rss/news.xml',                     name: 'Daily Nation KE' },
+  { url: 'https://www.theeastafrican.co.ke/rss/news.xml',             name: 'East African' },
+  { url: 'https://www.pulse.com.gh/feed',                             name: 'Pulse Ghana' },
+  { url: 'https://www.vanguardngr.com/feed/',                         name: 'Vanguard NG' },
+  // ── 중남미 ───────────────────────────────────────────────
+  { url: 'https://www.batimes.com.ar/feed',                           name: 'Buenos Aires Times' },
+  { url: 'https://colombiareports.com/feed/',                         name: 'Colombia Reports' },
+  { url: 'https://ticotimes.net/feed',                                name: 'Tico Times' },
+  { url: 'https://www.jamaicaobserver.com/feed/',                     name: 'Jamaica Observer' },
+  // ── 인도주의·인권 ────────────────────────────────────────
+  { url: 'https://www.unhcr.org/news/rss.xml',                        name: 'UNHCR' },
+  { url: 'https://www.icrc.org/en/rss.xml',                           name: 'ICRC' },
+  { url: 'https://www.hrw.org/rss.xml',                               name: 'Human Rights Watch' },
+  { url: 'https://www.amnesty.org/en/feed/',                          name: 'Amnesty Intl' },
+  { url: 'https://www.msf.org/en/rss',                                name: 'MSF' },
+  { url: 'https://www.crisisgroup.org/crisiswatch/feed',              name: 'Crisis Group' },
+  { url: 'https://reliefweb.int/updates/rss.xml',                     name: 'ReliefWeb Updates' },
+  // ── 경제·금융 ────────────────────────────────────────────
+  { url: 'https://www.imf.org/en/News/rss',                           name: 'IMF' },
+  { url: 'https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines', name: 'MarketWatch' },
+  // ── 과학·환경·기후 ───────────────────────────────────────
+  { url: 'https://rss.dw.com/xml/rss-en-environment',                 name: 'DW Environment' },
+  { url: 'https://www.iucn.org/feeds/news',                           name: 'IUCN' },
+  { url: 'https://www.unep.org/news-and-stories/rss.xml',             name: 'UNEP' },
+  // ── 기타 국제 ────────────────────────────────────────────
+  { url: 'https://www.nato.int/rss.xml',                              name: 'NATO' },
+  { url: 'https://www.osce.org/taxonomy/term/384/feed',               name: 'OSCE' },
+  { url: 'https://www.wfp.org/rss.xml',                               name: 'WFP' },
+  { url: 'https://www.iom.int/rss.xml',                               name: 'IOM' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
