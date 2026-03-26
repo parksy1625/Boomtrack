@@ -295,6 +295,50 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
   { url: 'https://www.wfp.org/rss.xml',                               name: 'WFP' },
   { url: 'https://www.iom.int/rss.xml',                               name: 'IOM' },
   { url: 'https://www.worldbank.org/en/news/rss',                     name: 'World Bank' },
+  // ── 재난·기상 ────────────────────────────────────────────
+  { url: 'https://www.gdacs.org/xml/rss_24h.xml',                    name: 'GDACS' },
+  { url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom', name: 'USGS Earthquakes' },
+  { url: 'https://www.fema.gov/feeds/disasters.rss',                 name: 'FEMA' },
+  { url: 'https://floodlist.com/feed',                               name: 'FloodList' },
+  { url: 'https://www.weather.gov/rss_page.php?site_name=nws',       name: 'NWS Alerts' },
+  { url: 'https://volcano.si.edu/news/WeeklyVolcanoActivity-Rss.xml',name: 'Smithsonian Volcano' },
+  { url: 'https://emergency.copernicus.eu/mapping/activations-rapid/feed', name: 'Copernicus EMS' },
+  // ── 보건·질병 ────────────────────────────────────────────
+  { url: 'https://www.who.int/rss-feeds/news-english.xml',           name: 'WHO' },
+  { url: 'https://promedmail.org/feed/',                             name: 'ProMED' },
+  { url: 'https://outbreaknewstoday.com/feed/',                      name: 'Outbreak News Today' },
+  // ── 핵·군사 ──────────────────────────────────────────────
+  { url: 'https://www.iaea.org/feeds/news',                          name: 'IAEA' },
+  { url: 'https://www.armscontrol.org/rss.xml',                      name: 'Arms Control' },
+  { url: 'https://thebulletin.org/feed/',                            name: 'Bulletin of Atomic Scientists' },
+  // ── 아프리카 추가 ────────────────────────────────────────
+  { url: 'https://www.ethiopia-monitor.com/feed/',                   name: 'Ethiopia Monitor' },
+  { url: 'https://www.sudantribune.com/spip.php?page=backend',       name: 'Sudan Tribune' },
+  { url: 'https://www.theciviliansd.com/feed/',                      name: 'The Civilian SD' },
+  { url: 'https://www.liberianobserver.com/feed/',                   name: 'Liberian Observer' },
+  { url: 'https://www.newvision.co.ug/feed/',                        name: 'New Vision UG' },
+  { url: 'https://www.independent.co.ug/feed/',                      name: 'Independent UG' },
+  { url: 'https://www.theeastafrican.co.ke/rss/news.xml',           name: 'East African' },
+  { url: 'https://saharareporters.com/rss.xml',                      name: 'Sahara Reporters' },
+  // ── 중동 추가 ────────────────────────────────────────────
+  { url: 'https://www.al-monitor.com/rss',                          name: 'Al Monitor' },
+  { url: 'https://english.ahram.org.eg/RssFeeds.aspx',              name: 'Al Ahram' },
+  { url: 'https://www.yalibnan.com/feed/',                           name: 'Ya Libnan' },
+  { url: 'https://www.jordantimes.com/rss.xml',                     name: 'Jordan Times' },
+  { url: 'https://www.rudaw.net/english/feed',                      name: 'Rudaw (Kurdistan)' },
+  // ── 중앙아시아 ───────────────────────────────────────────
+  { url: 'https://24.kg/english/rss.xml',                           name: '24.kg Kyrgyzstan' },
+  { url: 'https://kun.uz/en/rss',                                   name: 'Kun.uz Uzbekistan' },
+  { url: 'https://www.rferl.org/api/epiqxqim_tj',                   name: 'RFE/RL Tajikistan' },
+  // ── 라틴아메리카 추가 ────────────────────────────────────
+  { url: 'https://www.elnacional.com/feed/',                        name: 'El Nacional VE' },
+  { url: 'https://www.laprensa.hn/feed/',                           name: 'La Prensa HN' },
+  { url: 'https://www.elsalvador.com/feed/',                        name: 'El Salvador News' },
+  { url: 'https://haitilibre.com/en/rss-feed.xml',                  name: 'Haiti Libre' },
+  // ── 과학·우주·기술 ───────────────────────────────────────
+  { url: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',          name: 'NASA' },
+  { url: 'https://spaceweather.com/services/rss.xml',               name: 'Space Weather' },
+  { url: 'https://www.spaceweatherlive.com/en/news/rss.xml',        name: 'SpaceWeatherLive' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
