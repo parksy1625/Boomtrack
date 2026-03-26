@@ -2141,6 +2141,262 @@ async function fetchIAEA(): Promise<WorldEvent[]> {
 }
 
 // ─────────────────────────────────────────────────────────
+// 14. GeoNet NZ — 뉴질랜드/태평양 지진 (무료, 키 불필요)
+// ─────────────────────────────────────────────────────────
+
+async function fetchGeoNetNZ(): Promise<WorldEvent[]> {
+  const res = await fetch('https://api.geonet.org.nz/quake?MMI=3', {
+    ...fetchOpts(120),
+    headers: { Accept: 'application/vnd.geo+json' },
+  })
+  if (!res.ok) return []
+  const json = await res.json()
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const f of (json.features as any[]) ?? []) {
+    const [lng, lat] = f.geometry.coordinates as [number, number]
+    if (!isValidCoord(lat, lng)) continue
+    const p = f.properties
+    const mag = p.magnitude ?? 0
+    events.push({
+      id: `geonet-${p.publicID ?? Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'earthquake',
+      title: `M${mag.toFixed(1)} — ${p.locality ?? 'New Zealand'}`,
+      description: `GeoNet NZ 규모 ${mag.toFixed(1)} — 깊이 ${p.depth ?? '?'}km | MMI: ${p.mmi ?? '?'} | ${p.locality ?? ''}`,
+      severity: magToSeverity(mag),
+      location: p.locality ?? 'New Zealand',
+      country: 'New Zealand',
+      timestamp: p.time as string ?? new Date().toISOString(),
+      magnitude: mag,
+      source: 'GeoNet NZ',
+      newsUrl: `https://www.geonet.org.nz/earthquake/${p.publicID}`,
+    })
+  }
+  return events.slice(0, 60)
+}
+
+// ─────────────────────────────────────────────────────────
+// 15. INGV Italy — 이탈리아/지중해 지진 (FDSN, 무료, 키 불필요)
+// ─────────────────────────────────────────────────────────
+
+async function fetchINGV(): Promise<WorldEvent[]> {
+  const since = new Date(Date.now() - 24 * 3_600_000).toISOString().slice(0, 19)
+  const url = `https://webservices.ingv.it/fdsnws/event/1/query?format=geojson&limit=80&minmag=2.5&starttime=${since}&orderby=time`
+  const res = await fetch(url, fetchOpts(120))
+  if (!res.ok) return []
+  const json = await res.json()
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const f of (json.features as any[]) ?? []) {
+    const [lng, lat] = f.geometry.coordinates as [number, number]
+    if (!isValidCoord(lat, lng)) continue
+    const p = f.properties
+    const mag = p.mag ?? 0
+    events.push({
+      id: `ingv-${f.id ?? Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'earthquake',
+      title: `M${mag.toFixed(1)} — ${p.place ?? 'Italy/Mediterranean'}`,
+      description: `INGV 규모 ${mag.toFixed(1)} — ${p.place ?? ''} | 깊이 ${f.geometry.coordinates[2] ?? '?'}km`,
+      severity: magToSeverity(mag),
+      location: p.place ?? 'Italy',
+      country: '',
+      timestamp: p.time as string ?? new Date().toISOString(),
+      magnitude: mag,
+      source: 'INGV Italy',
+      newsUrl: `https://terremoti.ingv.it/event/${f.id}`,
+    })
+  }
+  return events.slice(0, 60)
+}
+
+// ─────────────────────────────────────────────────────────
+// 16. OpenFDA — 미국 식품/의약품 리콜 (무료, 키 불필요)
+// ─────────────────────────────────────────────────────────
+
+// Classification: I = 심각, II = 보통, III = 경미
+function fdaClassToSeverity(cls: string): Severity {
+  if (cls === 'Class I')   return 'critical'
+  if (cls === 'Class II')  return 'high'
+  return 'medium'
+}
+
+async function fetchOpenFDA(): Promise<WorldEvent[]> {
+  const [foodRes, drugRes] = await Promise.allSettled([
+    fetch('https://api.fda.gov/food/enforcement.json?limit=15&sort=report_date:desc', fetchOpts(300)),
+    fetch('https://api.fda.gov/drug/enforcement.json?limit=15&sort=report_date:desc', fetchOpts(300)),
+  ])
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function parseResults(res: PromiseSettledResult<Response>, category: 'food' | 'drug') {
+    if (res.status !== 'fulfilled' || !res.value.ok) return
+    const json = await res.value.json()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const item of (json.results as any[]) ?? []) {
+      const state: string = item.state ?? item.distribution_pattern ?? ''
+      const stateCoords = US_STATE_COORDS[state.trim().toUpperCase().slice(0, 2)]
+      const lat = stateCoords ? stateCoords[0] + (Math.random() - 0.5) * 2 : 38.5 + (Math.random() - 0.5) * 10
+      const lng = stateCoords ? stateCoords[1] + (Math.random() - 0.5) * 2 : -96.0 + (Math.random() - 0.5) * 20
+      const cls: string = item.classification ?? 'Class III'
+      events.push({
+        id: `fda-${item.recall_number ?? Math.random().toString(36).slice(2)}`,
+        lat, lng,
+        type: 'health',
+        title: `[FDA ${category === 'food' ? '식품' : '의약품'} 리콜] ${(item.product_description as string ?? '').slice(0, 70)}`,
+        description: `사유: ${item.reason_for_recall ?? ''} | 등급: ${cls} | 유통: ${(item.distribution_pattern ?? '').slice(0, 100)}`,
+        severity: fdaClassToSeverity(cls),
+        location: state || 'United States',
+        country: 'United States',
+        timestamp: item.report_date
+          ? new Date(
+              (item.report_date as string).replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3')
+            ).toISOString()
+          : new Date().toISOString(),
+        source: 'OpenFDA',
+        newsUrl: `https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts`,
+      })
+    }
+  }
+  await Promise.all([parseResults(foodRes, 'food'), parseResults(drugRes, 'drug')])
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 17. Smithsonian GVP — 주간 화산 활동 보고 (RSS)
+// ─────────────────────────────────────────────────────────
+
+async function fetchGVP(): Promise<WorldEvent[]> {
+  const res = await fetch('https://volcano.si.edu/news/WeeklyVolcanoRSS.xml', {
+    ...fetchOpts(3600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 20)) {
+    // 좌표 태그 우선, 없으면 텍스트 추출
+    let lat = item.geoLat
+    let lng = item.geoLng
+    let place = ''
+    if (!lat || !lng || !isValidCoord(lat, lng)) {
+      const found = coordsFromText(item.title + ' ' + item.description)
+      if (!found) continue
+      lat = found[0] + (Math.random() - 0.5) * found[3]
+      lng = found[1] + (Math.random() - 0.5) * found[3]
+      place = found[2]
+    }
+    if (!isValidCoord(lat, lng)) continue
+    const upper = (item.title + ' ' + item.description).toUpperCase()
+    const severity: Severity =
+      upper.includes('MAJOR') || upper.includes('EXPLOSIVE') || upper.includes('LARGE') ? 'critical' :
+      upper.includes('ERUPT') || upper.includes('LAVA')                                  ? 'high'     : 'medium'
+    events.push({
+      id: `gvp-${(item.link ?? '').slice(-24) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'disaster',
+      title: item.title || '화산 활동',
+      description: item.description.slice(0, 300),
+      severity,
+      location: place,
+      country: place,
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'Smithsonian GVP',
+      newsUrl: item.link || 'https://volcano.si.edu/reports_weekly.cfm',
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 18. CDC Health Alert Network — 미국 질병통제예방센터 보건 경보
+// ─────────────────────────────────────────────────────────
+
+async function fetchCDC(): Promise<WorldEvent[]> {
+  const res = await fetch('https://tools.cdc.gov/api/v2/resources/media/403372.rss', {
+    ...fetchOpts(600),
+    headers: { 'User-Agent': 'BoomTrack/1.0' },
+  })
+  if (!res.ok) return []
+  const xml = await res.text()
+  const items = parseRSSItems(xml)
+  const events: WorldEvent[] = []
+  for (const item of items.slice(0, 15)) {
+    const text = item.title + ' ' + item.description
+    const found = coordsFromText(text)
+    // 위치 불명이면 CDC 본부(Atlanta, GA) 좌표 사용
+    const lat = found ? found[0] + (Math.random() - 0.5) * (found[3] ?? 0.1) : 33.8 + (Math.random() - 0.5) * 20
+    const lng = found ? found[1] + (Math.random() - 0.5) * (found[3] ?? 0.1) : -84.4 + (Math.random() - 0.5) * 40
+    const upper = text.toUpperCase()
+    const severity: Severity =
+      upper.includes('EMERGENCY') || upper.includes('OUTBREAK') || upper.includes('PANDEMIC') ? 'critical' :
+      upper.includes('ALERT') || upper.includes('EPIDEMIC')                                    ? 'high'     : 'medium'
+    events.push({
+      id: `cdc-${(item.link ?? '').slice(-20) || Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'health',
+      title: item.title || 'CDC 보건 경보',
+      description: item.description.slice(0, 300),
+      severity,
+      location: found ? found[2] : 'United States',
+      country: found ? found[2] : 'United States',
+      timestamp: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      source: 'CDC HAN',
+      newsUrl: item.link || 'https://emergency.cdc.gov/han/',
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 19. USGS Volcano Hazards — 미국 화산 경보 (GeoJSON)
+// ─────────────────────────────────────────────────────────
+
+const VOLCANO_COLOR_SEV: Record<string, Severity> = {
+  RED: 'critical', ORANGE: 'high', YELLOW: 'medium', GREEN: 'low',
+}
+
+async function fetchUSGSVolcano(): Promise<WorldEvent[]> {
+  const res = await fetch(
+    'https://volcanoes.usgs.gov/vhp/feed/current_alerts.geojson',
+    fetchOpts(600)
+  )
+  if (!res.ok) return []
+  const json = await res.json()
+  const events: WorldEvent[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const f of (json.features as any[]) ?? []) {
+    const [lng, lat] = f.geometry?.coordinates ?? []
+    if (!isValidCoord(lat, lng)) continue
+    const p = f.properties
+    const colorCode: string = (p.alert_level ?? p.color_code ?? 'GREEN').toUpperCase()
+    const severity = VOLCANO_COLOR_SEV[colorCode] ?? 'medium'
+    if (severity === 'low') continue
+    events.push({
+      id: `usgsvol-${p.vnum ?? Math.random().toString(36).slice(2)}`,
+      lat, lng,
+      type: 'disaster',
+      title: `[화산] ${p.name ?? '화산 경보'} — ${colorCode}`,
+      description: `USGS 화산 경보 | 경보 수준: ${colorCode} | 항공: ${p.aviation_color_code ?? '?'} | ${p.activity_summary ?? ''}`.slice(0, 350),
+      severity,
+      location: p.name ?? '',
+      country: 'United States',
+      timestamp: p.timeLastUpdate ?? new Date().toISOString(),
+      source: 'USGS Volcano',
+      newsUrl: p.url ?? 'https://volcanoes.usgs.gov/',
+    })
+  }
+  return events
+}
+
+// ─────────────────────────────────────────────────────────
+// 20. Global Volcanism Program (Smithsonian) Current Eruptions
+//     + Volcano Observatory Notices (VAAC) via RSS
+// ─────────────────────────────────────────────────────────
+// (Already covered by fetchGVP above)
+
+// ─────────────────────────────────────────────────────────
 // Main GET handler
 // ─────────────────────────────────────────────────────────
 
@@ -2158,12 +2414,19 @@ export async function GET() {
     fetchWHO(),
     fetchPTWC(),
     fetchIAEA(),
+    fetchGeoNetNZ(),
+    fetchINGV(),
+    fetchOpenFDA(),
+    fetchGVP(),
+    fetchCDC(),
+    fetchUSGSVolcano(),
     ...NEWS_FEEDS.map(f => fetchNewsFeed(f.url, f.name)),
   ]
 
   const SOURCE_NAMES = [
     'USGS','EMSC','EONET','NOAA Alerts','Space Weather','GDACS','ReliefWeb',
     'FEMA','FloodList','WHO','PTWC','IAEA',
+    'GeoNet NZ','INGV Italy','OpenFDA','Smithsonian GVP','CDC HAN','USGS Volcano',
     ...NEWS_FEEDS.map(f => f.name),
   ]
 

@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
 import EventFeed from '@/components/EventFeed'
 import StatsPanel from '@/components/StatsPanel'
 import EventDetail from '@/components/EventDetail'
-import { WorldEvent } from '@/lib/types'
+import FilterBar from '@/components/FilterBar'
+import ClusterList from '@/components/ClusterList'
+import { WorldEvent, EventType, Severity } from '@/lib/types'
+import { dedup } from '@/lib/dedup'
 
 const Globe3D = dynamic(() => import('@/components/Globe3D'), {
   ssr: false,
@@ -39,9 +42,12 @@ export default function Home() {
   const [events, setEvents] = useState<WorldEvent[]>([])
   const [sources, setSources] = useState<Record<string, number>>({})
   const [selectedEvent, setSelectedEvent] = useState<WorldEvent | null>(null)
+  const [clusterEvents, setClusterEvents] = useState<WorldEvent[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [mobileTab, setMobileTab] = useState<MobileTab>('globe')
+  const [filterTypes, setFilterTypes] = useState<Set<EventType>>(new Set())
+  const [filterSeverity, setFilterSeverity] = useState<Severity | 'all'>('all')
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -71,16 +77,16 @@ export default function Home() {
             }
           } catch { /* 불완전한 청크 무시 */ }
         }
-        // 완료된 소스마다 즉시 화면 업데이트
         const sorted = [...merged].sort(
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         )
         setEvents(sorted)
         setSources({ ...srcCount })
       }
+      // 스트리밍 완료 후 dedup 적용
+      setEvents(prev => dedup(prev))
       setLastUpdate(new Date())
     } catch {
-      // network error — keep last state
       setIsLoading(false)
     }
   }, [])
@@ -93,10 +99,27 @@ export default function Home() {
 
   const criticalCount = events.filter(e => e.severity === 'critical').length
 
+  const handleTypeToggle = useCallback((t: EventType) => {
+    setFilterTypes(prev => {
+      const next = new Set(prev)
+      next.has(t) ? next.delete(t) : next.add(t)
+      return next
+    })
+  }, [])
+
+  const filteredEvents = useMemo(() =>
+    events.filter(e =>
+      (filterTypes.size === 0 || filterTypes.has(e.type)) &&
+      (filterSeverity === 'all' || e.severity === filterSeverity)
+    ), [events, filterTypes, filterSeverity])
+
   const handleEventClick = (event: WorldEvent) => {
     setSelectedEvent(event)
-    // On mobile, switch to globe tab when clicking from feed/stats
     setMobileTab('globe')
+  }
+
+  const handleClusterClick = (evts: WorldEvent[]) => {
+    setClusterEvents(evts)
   }
 
   return (
@@ -121,36 +144,44 @@ export default function Home() {
         </aside>
 
         {/* Center — 3D Globe */}
-        <div className="flex-1 min-w-0 relative">
-          <Globe3D events={events} onEventClick={setSelectedEvent} />
+        <div className="flex-1 min-w-0 relative flex flex-col">
+          <FilterBar
+            activeTypes={filterTypes}
+            activeSeverity={filterSeverity}
+            onTypeToggle={handleTypeToggle}
+            onSeverityChange={setFilterSeverity}
+          />
+          <div className="flex-1 min-h-0 relative">
+            <Globe3D events={filteredEvents} onEventClick={setSelectedEvent} onClusterClick={handleClusterClick} />
 
-          {/* Corner decorations */}
-          <div className="absolute top-3 left-3 pointer-events-none">
-            <div className="w-5 h-5 border-t-2 border-l-2 border-cyan-500/50" />
-          </div>
-          <div className="absolute top-3 right-3 pointer-events-none">
-            <div className="w-5 h-5 border-t-2 border-r-2 border-cyan-500/50" />
-          </div>
-          <div className="absolute bottom-3 left-3 pointer-events-none">
-            <div className="w-5 h-5 border-b-2 border-l-2 border-cyan-500/50" />
-          </div>
-          <div className="absolute bottom-3 right-3 pointer-events-none">
-            <div className="w-5 h-5 border-b-2 border-r-2 border-cyan-500/50" />
-          </div>
+            {/* Corner decorations */}
+            <div className="absolute top-3 left-3 pointer-events-none">
+              <div className="w-5 h-5 border-t-2 border-l-2 border-cyan-500/50" />
+            </div>
+            <div className="absolute top-3 right-3 pointer-events-none">
+              <div className="w-5 h-5 border-t-2 border-r-2 border-cyan-500/50" />
+            </div>
+            <div className="absolute bottom-3 left-3 pointer-events-none">
+              <div className="w-5 h-5 border-b-2 border-l-2 border-cyan-500/50" />
+            </div>
+            <div className="absolute bottom-3 right-3 pointer-events-none">
+              <div className="w-5 h-5 border-b-2 border-r-2 border-cyan-500/50" />
+            </div>
 
-          {/* Bottom hint */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-            <div className="flex items-center gap-4 text-[10px] font-mono text-gray-700 bg-black/60 px-4 py-1.5 rounded border border-gray-900">
-              <span>드래그: 회전</span>
-              <span>스크롤: 확대/축소</span>
-              <span>점 클릭: 상세보기</span>
+            {/* Bottom hint */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+              <div className="flex items-center gap-4 text-[10px] font-mono text-gray-700 bg-black/60 px-4 py-1.5 rounded border border-gray-900">
+                <span>드래그: 회전</span>
+                <span>스크롤: 확대/축소</span>
+                <span>점 클릭: 상세보기</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right — Event Feed */}
         <aside className="w-64 flex-shrink-0 border-l border-cyan-900/30 overflow-y-auto bg-black/40">
-          <EventFeed events={events} onEventClick={setSelectedEvent} />
+          <EventFeed events={filteredEvents} onEventClick={setSelectedEvent} />
         </aside>
       </div>
 
@@ -164,8 +195,7 @@ export default function Home() {
             pointerEvents: mobileTab === 'globe' ? 'auto' : 'none',
           }}
         >
-          <Globe3D events={events} onEventClick={setSelectedEvent} />
-          {/* Touch hint */}
+          <Globe3D events={filteredEvents} onEventClick={setSelectedEvent} onClusterClick={handleClusterClick} />
           {mobileTab === 'globe' && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
               <div className="text-[10px] font-mono text-gray-700 bg-black/60 px-3 py-1 rounded border border-gray-900 whitespace-nowrap">
@@ -185,7 +215,13 @@ export default function Home() {
         {/* Event feed */}
         {mobileTab === 'feed' && (
           <div className="absolute inset-0 overflow-y-auto bg-black/40">
-            <EventFeed events={events} onEventClick={handleEventClick} />
+            <FilterBar
+              activeTypes={filterTypes}
+              activeSeverity={filterSeverity}
+              onTypeToggle={handleTypeToggle}
+              onSeverityChange={setFilterSeverity}
+            />
+            <EventFeed events={filteredEvents} onEventClick={handleEventClick} />
           </div>
         )}
 
@@ -203,13 +239,11 @@ export default function Home() {
                     : 'text-gray-600 active:text-gray-400'
                 }`}
               >
-                {/* Active indicator */}
                 {isActive && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-px bg-cyan-400" />
                 )}
                 <span className="text-base leading-none">{tab.icon}</span>
                 <span className="text-[10px] font-mono tracking-wide">{tab.label}</span>
-                {/* Critical badge on feed tab */}
                 {tab.id === 'feed' && criticalCount > 0 && (
                   <span className="absolute top-1.5 right-[calc(50%-16px)] bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
                     {criticalCount > 99 ? '99+' : criticalCount}
@@ -220,6 +254,15 @@ export default function Home() {
           })}
         </nav>
       </div>
+
+      {/* Cluster list modal */}
+      {clusterEvents && (
+        <ClusterList
+          events={clusterEvents}
+          onSelect={e => { setSelectedEvent(e); setClusterEvents(null) }}
+          onClose={() => setClusterEvents(null)}
+        />
+      )}
 
       {/* Event detail modal */}
       {selectedEvent && (
