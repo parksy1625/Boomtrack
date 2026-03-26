@@ -28,16 +28,16 @@ const SEVERITY_R: Record<Severity, number> = {
 
 /** Grid size (degrees) and radius scale based on camera altitude */
 function getZoomParams(altitude: number): { gridDeg: number; rScale: number } {
-  if (altitude > 2.5) return { gridDeg: 10,  rScale: 1.00 }
-  if (altitude > 2.0) return { gridDeg: 7,   rScale: 0.90 }
-  if (altitude > 1.6) return { gridDeg: 5,   rScale: 0.78 }
-  if (altitude > 1.2) return { gridDeg: 3.5, rScale: 0.65 }
-  if (altitude > 0.9) return { gridDeg: 2.5, rScale: 0.55 }
-  if (altitude > 0.6) return { gridDeg: 1.5, rScale: 0.45 }
-  if (altitude > 0.4) return { gridDeg: 1.0, rScale: 0.36 }
-  if (altitude > 0.25)return { gridDeg: 0.5, rScale: 0.27 }
-  if (altitude > 0.15)return { gridDeg: 0.2, rScale: 0.20 }
-  return                     { gridDeg: 0.1, rScale: 0.14 }
+  if (altitude > 2.5) return { gridDeg: 6,   rScale: 1.00 }
+  if (altitude > 2.0) return { gridDeg: 4,   rScale: 0.90 }
+  if (altitude > 1.6) return { gridDeg: 3,   rScale: 0.78 }
+  if (altitude > 1.2) return { gridDeg: 2,   rScale: 0.65 }
+  if (altitude > 0.9) return { gridDeg: 1.5, rScale: 0.55 }
+  if (altitude > 0.6) return { gridDeg: 1.0, rScale: 0.45 }
+  if (altitude > 0.4) return { gridDeg: 0.6, rScale: 0.36 }
+  if (altitude > 0.25)return { gridDeg: 0.3, rScale: 0.27 }
+  if (altitude > 0.15)return { gridDeg: 0.1, rScale: 0.20 }
+  return                     { gridDeg: 0.05,rScale: 0.14 }
 }
 
 interface Cluster {
@@ -94,8 +94,8 @@ export default function Globe3D({ events, onEventClick }: Props) {
       return {
         lat: c.lat, lng: c.lng,
         color:    TYPE_COLORS[c.type] ?? 'rgba(255,255,255,0.8)',
-        altitude: Math.min(baseAlt * cScale * 0.8, 0.28),
-        radius:   Math.min(baseR * cScale * rScale * 0.8, 3.2),
+        altitude: Math.min(baseAlt * cScale * 0.72, 0.25),
+        radius:   Math.min(baseR * cScale * rScale * 0.72, 2.88),
         cluster: c,
       }
     }), [])
