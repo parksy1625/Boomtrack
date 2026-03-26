@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { WorldEvent, EventType, Severity } from '@/lib/types'
 import { parseRSSItems } from '@/lib/rssParser'
 
+// Vercel 함수 최대 실행시간 (hobby plan max: 60s)
+export const maxDuration = 60
+
 // ─────────────────────────────────────────────────────────
 // Shared helpers
 // ─────────────────────────────────────────────────────────
@@ -17,8 +20,8 @@ function isValidCoord(lat: unknown, lng: unknown): boolean {
 }
 
 
-function fetchOpts(revalidate: number): RequestInit {
-  return { next: { revalidate }, signal: AbortSignal.timeout(12_000) }
+function fetchOpts(revalidate: number, timeoutMs = 8_000): RequestInit {
+  return { next: { revalidate }, signal: AbortSignal.timeout(timeoutMs) }
 }
 
 function magToSeverity(mag: number): Severity {
@@ -936,7 +939,7 @@ const NEWS_FEEDS: Array<{ url: string; name: string }> = [
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
   const res = await fetch(feedUrl, {
-    ...fetchOpts(300),
+    ...fetchOpts(300, 6_000),
     headers: { 'User-Agent': 'BoomTrack/1.0', Accept: 'application/rss+xml, application/xml, text/xml' },
   })
   if (!res.ok) return []
