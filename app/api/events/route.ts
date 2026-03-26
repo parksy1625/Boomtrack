@@ -1256,8 +1256,9 @@ async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<World
     if (!lat || !lng || !isValidCoord(lat, lng)) {
       const found = coordsFromText(text)
       if (!found) continue
+      // lat·lng 독립 랜덤 — 국가/지역 단위일수록 더 넓게 분산
       lat = found[0] + (Math.random() - 0.5) * found[3]
-      lng = found[1] + (Math.random() - 0.5) * found[3]
+      lng = found[1] + (Math.random() - 0.5) * found[3] * 1.6
       country = found[2]
     }
     if (!isValidCoord(lat, lng)) continue
@@ -2238,12 +2239,12 @@ function coordsFromText(text: string): readonly [number, number, string, number]
 
   // 5. 지역 레이어
   for (const [name, c] of _sortedRegions) {
-    if (lower.includes(name.toLowerCase())) return [c[0], c[1], name, 1.0]
+    if (lower.includes(name.toLowerCase())) return [c[0], c[1], name, 3.0]
   }
 
   // 6. 국가 폴백
   for (const [name, c] of Object.entries(COUNTRY_COORDS)) {
-    if (text.includes(name)) return [c[0], c[1], name, 1.5]
+    if (text.includes(name)) return [c[0], c[1], name, 5.0]
   }
   return null
 }
