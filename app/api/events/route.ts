@@ -172,10 +172,18 @@ function typeFromText(text: string): EventType {
 }
 
 const NEWS_FEEDS: Array<{ url: string; name: string }> = [
-  { url: 'https://feeds.reuters.com/Reuters/worldNews',   name: 'Reuters' },
-  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',  name: 'BBC' },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml',    name: 'Al Jazeera' },
-  { url: 'https://rss.dw.com/xml/rss-en-world',          name: 'DW' },
+  // 기존 4개
+  { url: 'https://feeds.reuters.com/Reuters/worldNews',                name: 'Reuters' },
+  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',               name: 'BBC' },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml',                  name: 'Al Jazeera' },
+  { url: 'https://rss.dw.com/xml/rss-en-world',                        name: 'DW' },
+  // 신규 6개
+  { url: 'https://www.theguardian.com/world/rss',                      name: 'Guardian' },
+  { url: 'https://www.france24.com/en/rss',                            name: 'France 24' },
+  { url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml',     name: 'UN News' },
+  { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/rss.xml',      name: 'NHK World' },
+  { url: 'https://feeds.reuters.com/reuters/businessNews',             name: 'Reuters Business' },
+  { url: 'https://feeds.reuters.com/reuters/healthNews',               name: 'Reuters Health' },
 ]
 
 async function fetchNewsFeed(feedUrl: string, sourceName: string): Promise<WorldEvent[]> {
