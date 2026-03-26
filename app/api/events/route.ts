@@ -288,31 +288,61 @@ const COUNTRY_COORDS: Record<string, readonly [number, number]> = {
   Afghanistan:[33,65],Albania:[41,20],Algeria:[28,2],Angola:[-12,18],
   Argentina:[-34,-64],Armenia:[40,45],Australia:[-25,133],Austria:[47.5,14],
   Azerbaijan:[40.5,47.5],Bangladesh:[24,90],Belarus:[53,28],Belgium:[50.8,4.5],
-  Bolivia:[-17,-65],Brazil:[-10,-55],Bulgaria:[43,25],Cambodia:[13,105],
-  Cameroon:[6,12],Canada:[60,-96],'Central African Republic':[7,21],Chad:[15,19],
-  Chile:[-30,-71],China:[35,105],Colombia:[4,-72],Congo:[-1,15],Cuba:[22,-79.5],
-  'Czech Republic':[49.75,15.5],'Democratic Republic of the Congo':[-4,22],
-  Denmark:[56,10],Ecuador:[-2,-77.5],Egypt:[26,30],Ethiopia:[8,38],
-  Finland:[64,26],France:[46,2],Georgia:[42,43.5],Germany:[51,10],Ghana:[8,-2],
-  Greece:[39,22],Guatemala:[15.5,-90.25],Guinea:[11,-10],Haiti:[19,-72.5],
-  Honduras:[15,-86.5],Hungary:[47,19],India:[20,77],Indonesia:[-5,120],
-  Iran:[32,53],Iraq:[33,44],Ireland:[53,-8],Israel:[31.5,34.75],Italy:[42,12.5],
-  'Ivory Coast':[7.5,-5.5],Japan:[36,138],Jordan:[31,36],Kazakhstan:[48,68],
-  Kenya:[1,38],Kuwait:[29.5,47.75],Laos:[18,103],Lebanon:[33.85,35.9],
-  Libya:[27,17],Malaysia:[2.5,112.5],Mali:[17,-4],Mexico:[23,-102],
-  Morocco:[32,-5],Mozambique:[-18,35],Myanmar:[22,96],Nepal:[28,84],
-  Netherlands:[52.3,5.3],'New Zealand':[-42,174],Nicaragua:[13,-85],
-  Niger:[17,8],Nigeria:[10,8],'North Korea':[40,127],Norway:[64,26],
-  Pakistan:[30,70],Palestine:[31.9,35.2],Panama:[9,-80],Peru:[-10,-76],
-  Philippines:[13,122],Poland:[52,20],Portugal:[39.5,-8],Romania:[46,25],
-  Russia:[60,100],Rwanda:[-2,30],'Saudi Arabia':[24,45],Senegal:[14,-14],
-  Serbia:[44,21],Singapore:[1.35,103.82],Somalia:[6,46],'South Africa':[-29,25],
-  'South Korea':[36,128],'South Sudan':[7,30],Spain:[40,-4],'Sri Lanka':[7,81],
-  Sudan:[15,30],Sweden:[60,15],Switzerland:[47,8],Syria:[35,38],Taiwan:[23.5,121],
-  Tanzania:[-6,35],Thailand:[15,100],Tunisia:[34,9],Turkey:[39,35],Uganda:[1,32],
-  Ukraine:[49,32],'United Arab Emirates':[24,54],'United Kingdom':[54,-2],
-  'United States':[38,-97],Uruguay:[-33,-56],Uzbekistan:[41,64],
-  Venezuela:[8,-66],Vietnam:[16,108],Yemen:[15.5,47.5],Zimbabwe:[-20,30],
+  Belize:[17,-88.8],Benin:[9.3,2.3],Bhutan:[27.5,90.5],Bolivia:[-17,-65],
+  'Bosnia and Herzegovina':[44,17.5],Botswana:[-22,24],Brazil:[-10,-55],
+  Brunei:[4.5,114.7],Bulgaria:[43,25],
+  'Burkina Faso':[13,-2],Burundi:[-3.5,30],Cambodia:[13,105],Cameroon:[6,12],
+  Canada:[60,-96],'Cape Verde':[15,-24],'Central African Republic':[7,21],Chad:[15,19],
+  Chile:[-30,-71],China:[35,105],Colombia:[4,-72],Comoros:[-11.6,43.3],Congo:[-1,15],
+  'Costa Rica':[10,-84],Croatia:[45.2,15.5],Cuba:[22,-79.5],Cyprus:[35,33],
+  'Czech Republic':[49.75,15.5],Czechia:[49.75,15.5],
+  'Democratic Republic of the Congo':[-4,22],DRC:[-4,22],
+  Denmark:[56,10],Djibouti:[11.5,43],
+  'Dominican Republic':[19,-70.7],Ecuador:[-2,-77.5],Egypt:[26,30],
+  'El Salvador':[13.8,-88.9],Eritrea:[15,39],'Equatorial Guinea':[2,10],
+  Estonia:[58.7,25.1],Eswatini:[-26.5,31.5],Ethiopia:[8,38],Fiji:[-18,178],
+  Finland:[64,26],France:[46,2],Gabon:[-1,11.7],Gambia:[13.5,-15.5],
+  Georgia:[42,43.5],Germany:[51,10],Ghana:[8,-2],Greece:[39,22],
+  Guatemala:[15.5,-90.25],Guinea:[11,-10],'Guinea-Bissau':[12,-15],
+  Guyana:[5,-59],Haiti:[19,-72.5],Honduras:[15,-86.5],Hungary:[47,19],
+  Iceland:[65,-18],India:[20,77],Indonesia:[-5,120],Iran:[32,53],Iraq:[33,44],
+  Ireland:[53,-8],Israel:[31.5,34.75],Italy:[42,12.5],'Ivory Coast':[7.5,-5.5],
+  Jamaica:[18,-77.3],Japan:[36,138],Jordan:[31,36],Kazakhstan:[48,68],
+  Kenya:[1,38],Kosovo:[42.6,20.9],Kuwait:[29.5,47.75],Kyrgyzstan:[41,75],
+  Laos:[18,103],Latvia:[57,25],Lebanon:[33.85,35.9],Lesotho:[-29.5,28.3],
+  Liberia:[6.5,-9.4],Libya:[27,17],Liechtenstein:[47.2,9.6],Lithuania:[56,24],
+  Luxembourg:[49.75,6.17],Madagascar:[-20,47],Malawi:[-13.5,34],Malaysia:[2.5,112.5],
+  Maldives:[3.2,73],Mali:[17,-4],Malta:[35.9,14.5],'Marshall Islands':[9,168],
+  Mauritania:[20,-12],Mauritius:[-20.3,57.5],Mexico:[23,-102],
+  Micronesia:[7,150],Moldova:[47,29],Monaco:[43.7,7.4],Mongolia:[46,105],
+  Montenegro:[42.5,19.3],Morocco:[32,-5],Mozambique:[-18,35],Myanmar:[22,96],
+  Namibia:[-22,17],Nepal:[28,84],Netherlands:[52.3,5.3],'New Zealand':[-42,174],
+  Nicaragua:[13,-85],Niger:[17,8],Nigeria:[10,8],'North Korea':[40,127],
+  'North Macedonia':[41.6,21.7],Norway:[64,26],Oman:[21,57],Pakistan:[30,70],
+  Palau:[7.5,134.6],Palestine:[31.9,35.2],'Papua New Guinea':[-6,147],
+  Panama:[9,-80],Paraguay:[-23,-58],Peru:[-10,-76],Philippines:[13,122],
+  Poland:[52,20],Portugal:[39.5,-8],Qatar:[25.5,51.2],Romania:[46,25],Russia:[60,100],
+  Rwanda:[-2,30],'Saint Lucia':[13.9,-60.98],'San Marino':[43.9,12.5],
+  'São Tomé and Príncipe':[0.5,6.6],'Saudi Arabia':[24,45],Senegal:[14,-14],
+  Serbia:[44,21],Seychelles:[-4.67,55.5],'Sierra Leone':[8.5,-12],Singapore:[1.35,103.82],
+  Slovakia:[48.7,19.7],Slovenia:[46.1,14.8],'Solomon Islands':[-9,160],
+  Somalia:[6,46],'South Africa':[-29,25],'South Korea':[36,128],'South Sudan':[7,30],
+  Spain:[40,-4],'Sri Lanka':[7,81],Sudan:[15,30],Suriname:[4,-56],Sweden:[60,15],
+  Switzerland:[47,8],Syria:[35,38],Taiwan:[23.5,121],Tajikistan:[39,71],
+  Tanzania:[-6,35],Thailand:[15,100],'Timor-Leste':[-8.9,125.7],'East Timor':[-8.9,125.7],
+  Togo:[8,1.2],Tonga:[-20,-175],Trinidad:[10.7,-61.2],'Trinidad and Tobago':[10.7,-61.2],
+  Tunisia:[34,9],Turkey:[39,35],Turkmenistan:[40,60],Tuvalu:[-8,178],
+  Uganda:[1,32],Ukraine:[49,32],'United Arab Emirates':[24,54],UAE:[24,54],
+  'United Kingdom':[54,-2],UK:[54,-2],Britain:[54,-2],'United States':[38,-97],
+  US:[38,-97],USA:[38,-97],Uruguay:[-33,-56],Uzbekistan:[41,64],Vanuatu:[-16,167],
+  Venezuela:[8,-66],Vietnam:[16,108],Yemen:[15.5,47.5],Zambia:[-13.5,27.5],Zimbabwe:[-20,30],
+  // 추가 별칭
+  'South America':[-15,-60],'North America':[45,-100],'Latin America':[0,-70],
+  'Middle East':[29,42],'Southeast Asia':[10,110],'Central Asia':[43,65],
+  'East Africa':[0,35],'West Africa':[10,-5],'Central Africa':[5,20],
+  'Sub-Saharan Africa':[5,20],'Eastern Europe':[50,30],'Western Europe':[48,5],
+  Europe:[50,15],Africa:[10,20],Asia:[35,95],Americas:[0,-70],
+  'Pacific':[0,170],'Arctic':[80,0],'Antarctic':[-80,0],
 }
 
 const RW_TYPE: Record<string, EventType> = {
@@ -1002,6 +1032,38 @@ Object.assign(CITY_COORDS, {
   'Port-of-Spain':[10.65,-61.52],'Bridgetown':[13.10,-59.62],
   'Nassau':[25.04,-77.35],'Georgetown GY':[6.80,-58.16],
   'Paramaribo':[5.87,-55.17],'Cayenne':[4.93,-52.33],
+  // 태평양 도서국 수도
+  'Nuku\'alofa':[-21.13,-175.20],'Apia':[-13.83,-171.77],'Funafuti':[-8.52,179.19],
+  'Honiara':[-9.43,160.05],'Port Vila':[-17.73,168.32],'Suva':[-18.14,178.44],
+  'Ngerulmud':[7.50,134.62],'Palikir':[6.92,158.16],'Majuro':[7.09,171.38],
+  'Tarawa':[1.33,173.00],'South Tarawa':[1.35,173.02],'Yaren':[-0.55,166.92],
+  // 아프리카 추가 수도·주요도시
+  'Malabo':[3.75,8.78],'São Tomé':[0.34,6.73],'Praia':[14.93,-23.51],
+  'Moroni':[-11.70,43.26],'Victoria SC':[-4.62,55.45],'Asmara':[15.33,38.93],
+  'Maseru':[-29.32,27.48],
+  'Mbabane':[-26.32,31.13],'Windhoek':[-22.56,17.08],'Gaborone':[-24.65,25.91],
+  'Libreville':[0.39,9.45],'Bangui':[4.36,18.56],'Brazzaville':[-4.27,15.28],
+  'Bissau':[11.86,-15.60],'Conakry':[9.54,-13.68],'Freetown':[8.49,-13.23],
+  'Monrovia':[6.30,-10.80],'Yamoussoukro':[6.82,-5.29],
+  // 분쟁·분리주의 지역
+  'Soledar':[48.68,38.10],'Toretsk':[48.40,37.86],'Chasiv Yar':[48.60,37.85],
+  'Vuhledar':[47.83,37.25],'Robotyne':[47.46,35.83],'Orikhiv':[47.55,35.79],
+  'Huliaipole':[47.66,36.26],'Kostiantynivka':[48.53,37.72],
+  'Marinka':[47.95,37.51],'Volnovakha':[47.60,37.50],
+  // 사헬 분쟁지역 도시
+  'Sévaré':[14.53,-4.10],'Mopti':[14.49,-4.20],'Kidal':[18.44,1.41],
+  'Ménaka':[15.91,2.40],'Tillabéri':[14.21,1.45],'Agadez':[16.97,7.99],'Diffa':[13.32,12.62],
+  'Bossangoa':[6.49,17.46],'Bambari':[5.76,20.68],'Kaga-Bandoro':[6.99,19.18],
+  'Bamenda':[5.96,10.16],'Buea':[4.15,9.23],
+  // 중앙아시아 추가
+  'Osh':[40.52,72.82],'Jalal-Abad':[40.93,73.00],'Namangan':[41.00,71.67],
+  'Andijan':[40.78,72.34],'Fergana':[40.39,71.79],'Samarkand':[39.65,66.98],
+  'Bukhara':[39.77,64.42],'Nukus':[42.45,59.60],'Mary':[37.59,61.82],
+  'Khujand':[40.28,69.62],'Kulob':[37.91,69.80],
+  // 코카서스 추가
+  'Stepanakert':[39.82,46.75],'Gyumri':[40.79,43.84],'Vanadzor':[40.81,44.49],
+  'Rustavi':[41.55,44.99],'Kutaisi':[42.27,42.70],'Batumi':[41.65,41.64],
+  'Ganja':[40.68,46.36],'Sumqayit':[40.59,49.65],'Nakhchivan':[39.21,45.41],
 } as Record<string, readonly [number, number]>)
 
 // ── 도시 추출 최적화: 모듈 레벨 캐시 ──────────────────────
@@ -1053,42 +1115,66 @@ function hasWordBoundary(text: string, idx: number, len: number): boolean {
   return before && after
 }
 
-/** 텍스트에서 위치 추출
- *  순서: 데이트라인 → 전치사패턴 → 전문스캔(단어경계) → 지역 → 국가
+interface _Candidate {
+  lat: number; lng: number; name: string; jitter: number; score: number
+}
+// 컨텍스트 패턴: "city of X", "X province/state/oblast" 등
+const _CTX_RE = /\b(?:city of|capital of|province of|region of|state of|port of|district of|in the city of|town of)\s+([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:\s+[A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})|([A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+(?:\s+[A-Z][a-záéíóúàèìòùäëïöüâêîôûçñ]+){0,2})\s+(?:province|state|oblast|district|prefecture|governorate|region|county|municipality|city)\b/gi
+
+/** 텍스트에서 위치 추출 — 점수 기반 다중후보 선택
+ *  순서: 데이트라인(즉시) → 컨텍스트(15) → 전치사(12) → 전문스캔(빈도×4) → 지역(1.0°) → 국가(1.5°)
  *  반환: [lat, lng, 장소명, jitter반경(도)] */
 function coordsFromText(text: string): readonly [number, number, string, number] | null {
-  // 1. 뉴스 데이트라인: "MOSCOW (Reuters) —" / "KYIV, Ukraine —"
+  const lower = text.toLowerCase()
+
+  // 1. 데이트라인 — 최고 신뢰도, 즉시 반환
   const dl = text.match(/^([A-Z][A-Za-z\s'.()-]{1,32}?)(?:,\s*[A-Za-z\s]+?)?\s*(?:\([^)]{1,30}\)\s*)?[-–—]/)
   if (dl) {
     const r = lookupCity(dl[1].trim())
     if (r) return r
   }
 
-  // 2. 전치사 패턴: "in Gaza", "near Kyiv", "from Kabul"
-  _PREP_RE.lastIndex = 0
+  const cands: _Candidate[] = []
+
+  // 2. 컨텍스트 패턴 (score 15): "city of Cairo", "Donbas region"
+  _CTX_RE.lastIndex = 0
   let m: RegExpExecArray | null
+  while ((m = _CTX_RE.exec(text)) !== null) {
+    const raw = (m[1] ?? m[2] ?? '').trim()
+    if (!raw) continue
+    const r = lookupCity(raw)
+    if (r) cands.push({ lat: r[0], lng: r[1], name: r[2], jitter: r[3], score: 15 })
+  }
+
+  // 3. 전치사 패턴 (score 12): "in Kyiv", "near Aleppo", "from Kabul"
+  _PREP_RE.lastIndex = 0
   while ((m = _PREP_RE.exec(text)) !== null) {
     const r = lookupCity(m[1])
-    if (r) return r
+    if (r) cands.push({ lat: r[0], lng: r[1], name: r[2], jitter: r[3], score: 12 })
   }
 
-  // 3. 전문 스캔 — 긴 이름 우선, 단어경계 체크
-  const lower = text.toLowerCase()
+  // 4. 전문 스캔 — 언급 횟수 × 4점 (최대 5회 카운트)
   for (const [name, c] of _sortedCities) {
     const nl = name.toLowerCase()
-    const idx = lower.indexOf(nl)
+    let idx = lower.indexOf(nl)
     if (idx === -1) continue
-    // 6자 미만 단어는 경계 체크 (Nice, Bath, Aden 등 오탐 방지)
     if (nl.length < 6 && !hasWordBoundary(lower, idx, nl.length)) continue
-    return [c[0], c[1], name, 0.12]
+    let count = 0
+    while (idx !== -1 && count < 5) { count++; idx = lower.indexOf(nl, idx + nl.length) }
+    cands.push({ lat: c[0], lng: c[1], name, jitter: 0.12, score: count * 4 })
   }
 
-  // 4. 주·도·지역 중간 레이어
+  if (cands.length > 0) {
+    const best = cands.reduce((b, c) => c.score > b.score ? c : b)
+    return [best.lat, best.lng, best.name, best.jitter]
+  }
+
+  // 5. 지역 레이어
   for (const [name, c] of _sortedRegions) {
     if (lower.includes(name.toLowerCase())) return [c[0], c[1], name, 1.0]
   }
 
-  // 5. 국가 폴백
+  // 6. 국가 폴백
   for (const [name, c] of Object.entries(COUNTRY_COORDS)) {
     if (text.includes(name)) return [c[0], c[1], name, 1.5]
   }
