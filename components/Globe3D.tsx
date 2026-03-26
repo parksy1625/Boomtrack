@@ -94,8 +94,8 @@ export default function Globe3D({ events, onEventClick }: Props) {
       return {
         lat: c.lat, lng: c.lng,
         color:    TYPE_COLORS[c.type] ?? 'rgba(255,255,255,0.8)',
-        altitude: Math.min(baseAlt * cScale, 0.35),
-        radius:   Math.min(baseR * cScale * rScale, 4.0),
+        altitude: Math.min(baseAlt * cScale * 0.8, 0.28),
+        radius:   Math.min(baseR * cScale * rScale * 0.8, 3.2),
         cluster: c,
       }
     }), [])
