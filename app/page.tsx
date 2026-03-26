@@ -25,7 +25,15 @@ const Globe3D = dynamic(() => import('@/components/Globe3D'), {
   ),
 })
 
-const REFRESH_INTERVAL = 60_000 // 1 minute (real APIs have rate limits)
+const REFRESH_INTERVAL = 60_000
+
+type MobileTab = 'globe' | 'stats' | 'feed'
+
+const MOBILE_TABS: Array<{ id: MobileTab; label: string; icon: string }> = [
+  { id: 'stats', label: '통계', icon: '≡' },
+  { id: 'globe', label: '지구본', icon: '◉' },
+  { id: 'feed', label: '피드', icon: '☰' },
+]
 
 export default function Home() {
   const [events, setEvents] = useState<WorldEvent[]>([])
@@ -33,6 +41,7 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<WorldEvent | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [mobileTab, setMobileTab] = useState<MobileTab>('globe')
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -57,6 +66,12 @@ export default function Home() {
 
   const criticalCount = events.filter(e => e.severity === 'critical').length
 
+  const handleEventClick = (event: WorldEvent) => {
+    setSelectedEvent(event)
+    // On mobile, switch to globe tab when clicking from feed/stats
+    setMobileTab('globe')
+  }
+
   return (
     <main className="flex flex-col h-screen bg-[#00000f] overflow-hidden relative">
       {/* Scanline overlay */}
@@ -71,7 +86,8 @@ export default function Home() {
         criticalCount={criticalCount}
       />
 
-      <div className="flex flex-1 min-h-0">
+      {/* ── Desktop layout (md+) ── */}
+      <div className="hidden md:flex flex-1 min-h-0">
         {/* Left — Stats */}
         <aside className="w-60 flex-shrink-0 border-r border-cyan-900/30 overflow-y-auto bg-black/40">
           <StatsPanel events={events} sources={sources} />
@@ -109,6 +125,73 @@ export default function Home() {
         <aside className="w-64 flex-shrink-0 border-l border-cyan-900/30 overflow-y-auto bg-black/40">
           <EventFeed events={events} onEventClick={setSelectedEvent} />
         </aside>
+      </div>
+
+      {/* ── Mobile layout (< md) ── */}
+      <div className="flex md:hidden flex-1 min-h-0 relative">
+        {/* Globe — always mounted, visibility controlled by CSS */}
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: mobileTab === 'globe' ? 1 : 0,
+            pointerEvents: mobileTab === 'globe' ? 'auto' : 'none',
+          }}
+        >
+          <Globe3D events={events} onEventClick={setSelectedEvent} />
+          {/* Touch hint */}
+          {mobileTab === 'globe' && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+              <div className="text-[10px] font-mono text-gray-700 bg-black/60 px-3 py-1 rounded border border-gray-900 whitespace-nowrap">
+                드래그: 회전 · 핀치: 확대 · 탭: 상세보기
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Stats panel */}
+        {mobileTab === 'stats' && (
+          <div className="absolute inset-0 overflow-y-auto bg-black/40">
+            <StatsPanel events={events} sources={sources} />
+          </div>
+        )}
+
+        {/* Event feed */}
+        {mobileTab === 'feed' && (
+          <div className="absolute inset-0 overflow-y-auto bg-black/40">
+            <EventFeed events={events} onEventClick={handleEventClick} />
+          </div>
+        )}
+
+        {/* Bottom tab bar */}
+        <nav className="absolute bottom-0 left-0 right-0 flex border-t border-cyan-900/40 bg-black/90 backdrop-blur-sm z-20">
+          {MOBILE_TABS.map(tab => {
+            const isActive = mobileTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setMobileTab(tab.id)}
+                className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors relative ${
+                  isActive
+                    ? 'text-cyan-400'
+                    : 'text-gray-600 active:text-gray-400'
+                }`}
+              >
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-px bg-cyan-400" />
+                )}
+                <span className="text-base leading-none">{tab.icon}</span>
+                <span className="text-[10px] font-mono tracking-wide">{tab.label}</span>
+                {/* Critical badge on feed tab */}
+                {tab.id === 'feed' && criticalCount > 0 && (
+                  <span className="absolute top-1.5 right-[calc(50%-16px)] bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+                    {criticalCount > 99 ? '99+' : criticalCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </nav>
       </div>
 
       {/* Event detail modal */}

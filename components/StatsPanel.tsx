@@ -76,7 +76,7 @@ export default function StatsPanel({ events, sources }: Props) {
     : null
 
   return (
-    <div className="p-3 space-y-3 font-mono text-xs select-none">
+    <div className="p-3 pb-16 md:pb-3 space-y-3 font-mono text-xs select-none">
       <div className="text-[10px] tracking-widest text-gray-600 uppercase pt-1">통계 패널</div>
 
       {/* Total */}

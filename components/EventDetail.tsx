@@ -60,11 +60,11 @@ export default function EventDetail({ event, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className={`bg-gray-950 border rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-2xl ${SEVERITY_COLORS[event.severity]}`}
+        className={`bg-gray-950 border rounded-t-2xl md:rounded-lg max-w-md w-full md:mx-4 overflow-hidden shadow-2xl max-h-[85vh] overflow-y-auto ${SEVERITY_COLORS[event.severity]}`}
         onClick={e => e.stopPropagation()}
       >
         {/* Severity header stripe */}

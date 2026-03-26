@@ -62,7 +62,7 @@ interface Props {
 
 export default function EventFeed({ events, onEventClick }: Props) {
   return (
-    <div className="p-3 font-mono">
+    <div className="p-3 pb-16 md:pb-3 font-mono">
       <div className="flex items-center gap-2 text-[10px] text-gray-600 mb-3 uppercase tracking-widest">
         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         실시간 이벤트 피드
