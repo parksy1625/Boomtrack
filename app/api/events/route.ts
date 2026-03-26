@@ -775,10 +775,9 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
   'Suva':[-18.14,178.44],'Port Moresby':[-9.44,147.18],'Honiara':[-9.43,160.05],
   // 우크라이나 전선 도시
   'Donetsk':[48.01,37.80],'Luhansk':[48.57,39.34],'Bakhmut':[48.60,38.00],
-  'Avdiivka':[48.14,37.75],'Mariupol':[47.11,37.54],'Sevastopol':[44.60,33.52],
+  'Avdiivka':[48.14,37.75],'Sevastopol':[44.60,33.52],
   'Mykolaiv':[46.97,32.00],'Sumy':[50.91,34.80],'Chernihiv':[51.49,31.29],
-  'Kramatorsk':[48.73,37.56],'Sloviansk':[48.87,37.63],'Kherson':[46.64,32.62],
-  'Zaporizhzhia':[47.84,35.14],'Melitopol':[46.85,35.37],
+  'Kramatorsk':[48.73,37.56],'Sloviansk':[48.87,37.63],'Melitopol':[46.85,35.37],
   // 러시아 국경지역
   'Belgorod':[50.60,36.59],'Kursk':[51.73,36.19],'Bryansk':[53.25,34.37],
   'Voronezh':[51.67,39.18],'Rostov-on-Don':[47.23,39.72],'Krasnodar':[45.04,38.98],
@@ -842,9 +841,9 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
   'Maiduguri':[11.84,13.16],'Sokoto':[13.06,5.24],'Gao':[16.27,-0.04],'Timbuktu':[16.77,-3.00],
   // 남미 추가
   'Medellín':[6.25,-75.56],'Barranquilla':[10.96,-74.80],'Cartagena':[10.40,-75.51],
-  'Maracaibo':[10.67,-71.61],'Valencia':[10.18,-68.00],'Barquisimeto':[10.07,-69.32],
+  'Maracaibo VE':[10.67,-71.61],'Valencia VE':[10.18,-68.00],'Barquisimeto':[10.07,-69.32],
   'Cochabamba':[-17.39,-66.16],'Sucre':[-19.05,-65.26],
-  'Guayaquil':[-2.19,-79.89],'Cuenca':[-2.90,-79.00],
+  'Cuenca':[-2.90,-79.00],
   'Trujillo':[-8.11,-79.02],'Chiclayo':[-6.78,-79.84],'Iquitos':[-3.74,-73.25],
   'Mendoza':[-32.89,-68.83],'Tucumán':[-26.82,-65.22],'Mar del Plata':[-38.00,-57.55],
   'Concepción':[-36.82,-73.05],'Antofagasta':[-23.65,-70.40],
@@ -854,10 +853,10 @@ const CITY_COORDS: Record<string, readonly [number, number]> = {
 const REGION_COORDS: Record<string, readonly [number, number]> = {
   // 미국 주
   'California':[36.78,-119.42],'Texas':[31.97,-99.90],'Florida':[27.99,-81.76],
-  'New York':[42.97,-75.52],'Pennsylvania':[41.20,-77.19],'Illinois':[40.35,-88.99],
+  'New York State':[42.97,-75.52],'Pennsylvania':[41.20,-77.19],'Illinois':[40.35,-88.99],
   'Ohio':[40.41,-82.71],'Georgia':[32.16,-82.90],'North Carolina':[35.63,-79.81],
   'Michigan':[44.31,-85.60],'New Jersey':[40.06,-74.41],'Virginia':[37.93,-79.02],
-  'Washington':[47.51,-120.74],'Arizona':[34.04,-111.09],'Massachusetts':[42.41,-71.38],
+  'Washington State':[47.51,-120.74],'Arizona':[34.04,-111.09],'Massachusetts':[42.41,-71.38],
   'Tennessee':[35.86,-86.35],'Indiana':[40.27,-86.13],'Missouri':[38.46,-92.29],
   'Maryland':[39.05,-76.64],'Wisconsin':[44.27,-89.62],'Colorado':[39.55,-105.78],
   'Minnesota':[46.39,-94.64],'South Carolina':[33.84,-81.16],'Alabama':[32.32,-86.90],
