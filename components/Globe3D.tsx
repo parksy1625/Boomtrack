@@ -26,7 +26,15 @@ const SEVERITY_R: Record<Severity, number> = {
   low: 0.3, medium: 0.5, high: 0.8, critical: 1.3,
 }
 
-const CLUSTER_DEG = 4 // ~440km grid
+/** Grid size (degrees) and radius scale based on camera altitude */
+function getZoomParams(altitude: number): { gridDeg: number; rScale: number } {
+  if (altitude > 2.2) return { gridDeg: 8,   rScale: 1.00 }
+  if (altitude > 1.5) return { gridDeg: 5,   rScale: 0.80 }
+  if (altitude > 1.0) return { gridDeg: 3,   rScale: 0.65 }
+  if (altitude > 0.6) return { gridDeg: 1.5, rScale: 0.50 }
+  if (altitude > 0.3) return { gridDeg: 0.8, rScale: 0.35 }
+  return                     { gridDeg: 0.3, rScale: 0.22 }
+}
 
 interface Cluster {
   lat: number; lng: number; count: number
@@ -34,10 +42,10 @@ interface Cluster {
   events: WorldEvent[]
 }
 
-function buildClusters(events: WorldEvent[]): Cluster[] {
+function buildClusters(events: WorldEvent[], gridDeg: number): Cluster[] {
   const cells = new Map<string, WorldEvent[]>()
   for (const e of events) {
-    const key = `${Math.round(e.lat / CLUSTER_DEG)},${Math.round(e.lng / CLUSTER_DEG)}`
+    const key = `${Math.round(e.lat / gridDeg)},${Math.round(e.lng / gridDeg)}`
     if (!cells.has(key)) cells.set(key, [])
     cells.get(key)!.push(e)
   }
@@ -67,21 +75,23 @@ interface Props {
 export default function Globe3D({ events, onEventClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeRef = useRef<any>(null)
-  const onClickRef = useRef(onEventClick)
-  useEffect(() => { onClickRef.current = onEventClick }, [onEventClick])
+  const globeRef    = useRef<any>(null)
+  const eventsRef   = useRef<WorldEvent[]>(events)
+  const onClickRef  = useRef(onEventClick)
 
-  const toPoints = useCallback((clusters: Cluster[]): GlobePt[] =>
+  useEffect(() => { onClickRef.current = onEventClick }, [onEventClick])
+  useEffect(() => { eventsRef.current = events },         [events])
+
+  const toPoints = useCallback((clusters: Cluster[], rScale: number): GlobePt[] =>
     clusters.map(c => {
       const baseAlt = SEVERITY_ALT[c.severity]
       const baseR   = SEVERITY_R[c.severity]
-      // Clusters grow taller and wider with count (log scale, capped)
-      const scale   = c.count === 1 ? 1 : Math.min(5, 1 + Math.log2(c.count) * 0.9)
+      const cScale  = c.count === 1 ? 1 : Math.min(5, 1 + Math.log2(c.count) * 0.9)
       return {
         lat: c.lat, lng: c.lng,
-        color: TYPE_COLORS[c.type] ?? 'rgba(255,255,255,0.8)',
-        altitude: Math.min(baseAlt * scale, 0.35),
-        radius:   Math.min(baseR   * scale, 4.0),
+        color:    TYPE_COLORS[c.type] ?? 'rgba(255,255,255,0.8)',
+        altitude: Math.min(baseAlt * cScale, 0.35),
+        radius:   Math.min(baseR * cScale * rScale, 4.0),
         cluster: c,
       }
     }), [])
@@ -94,8 +104,18 @@ export default function Globe3D({ events, onEventClick }: Props) {
         : (t: number) => `rgba(255,120,0,${1 - t})`,
       maxR: e.severity === 'critical' ? 5 : 3,
       propagationSpeed: e.severity === 'critical' ? 2 : 1.5,
-      repeatPeriod: e.severity === 'critical' ? 800 : 1300,
+      repeatPeriod:     e.severity === 'critical' ? 800 : 1300,
     })), [])
+
+  // Re-cluster whenever altitude or events change
+  const recluster = useCallback((globe: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const g = globe as any
+    const { altitude } = g.pointOfView()
+    const { gridDeg, rScale } = getZoomParams(altitude)
+    const clusters = buildClusters(eventsRef.current, gridDeg)
+    g.pointsData(toPoints(clusters, rScale))
+  }, [toPoints])
 
   useEffect(() => {
     const container = containerRef.current
@@ -124,26 +144,34 @@ export default function Globe3D({ events, onEventClick }: Props) {
         })
         .ringsData([]).ringLat('lat').ringLng('lng').ringColor('color')
         .ringMaxRadius('maxR').ringPropagationSpeed('propagationSpeed').ringRepeatPeriod('repeatPeriod')
+
       globe.controls().autoRotate = true
       globe.controls().autoRotateSpeed = 0.35
       globe.controls().enableDamping = true
       globe.pointOfView({ altitude: 2.2 }, 0)
       globeRef.current = globe
+
+      // Re-cluster on zoom
+      let debounce: ReturnType<typeof setTimeout>
+      globe.controls().addEventListener('change', () => {
+        clearTimeout(debounce)
+        debounce = setTimeout(() => recluster(globe), 80)
+      })
+
       const obs = new ResizeObserver(() => {
         globe.width(container.clientWidth)
         globe.height(container.clientHeight)
       })
       obs.observe(container)
-      return () => obs.disconnect()
+      return () => { obs.disconnect(); clearTimeout(debounce) }
     })
-  }, [])
+  }, [recluster])
 
   useEffect(() => {
     if (!globeRef.current) return
-    const clusters = buildClusters(events)
-    globeRef.current.pointsData(toPoints(clusters))
+    recluster(globeRef.current)
     globeRef.current.ringsData(toRings(events))
-  }, [events, toPoints, toRings])
+  }, [events, recluster, toRings])
 
   return (
     <div ref={containerRef} className="w-full h-full"
