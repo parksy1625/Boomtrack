@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import EventFeed from '@/components/EventFeed'
 import StatsPanel from '@/components/StatsPanel'
 import EventDetail from '@/components/EventDetail'
+import ClusterList from '@/components/ClusterList'
 import { WorldEvent } from '@/lib/types'
 
 const Globe3D = dynamic(() => import('@/components/Globe3D'), {
@@ -39,6 +40,7 @@ export default function Home() {
   const [events, setEvents] = useState<WorldEvent[]>([])
   const [sources, setSources] = useState<Record<string, number>>({})
   const [selectedEvent, setSelectedEvent] = useState<WorldEvent | null>(null)
+  const [clusterEvents, setClusterEvents] = useState<WorldEvent[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [mobileTab, setMobileTab] = useState<MobileTab>('globe')
@@ -95,8 +97,11 @@ export default function Home() {
 
   const handleEventClick = (event: WorldEvent) => {
     setSelectedEvent(event)
-    // On mobile, switch to globe tab when clicking from feed/stats
     setMobileTab('globe')
+  }
+
+  const handleClusterClick = (evts: WorldEvent[]) => {
+    setClusterEvents(evts)
   }
 
   return (
@@ -122,7 +127,7 @@ export default function Home() {
 
         {/* Center — 3D Globe */}
         <div className="flex-1 min-w-0 relative">
-          <Globe3D events={events} onEventClick={setSelectedEvent} />
+          <Globe3D events={events} onEventClick={setSelectedEvent} onClusterClick={handleClusterClick} />
 
           {/* Corner decorations */}
           <div className="absolute top-3 left-3 pointer-events-none">
@@ -164,7 +169,7 @@ export default function Home() {
             pointerEvents: mobileTab === 'globe' ? 'auto' : 'none',
           }}
         >
-          <Globe3D events={events} onEventClick={setSelectedEvent} />
+          <Globe3D events={events} onEventClick={setSelectedEvent} onClusterClick={handleClusterClick} />
           {/* Touch hint */}
           {mobileTab === 'globe' && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
@@ -220,6 +225,15 @@ export default function Home() {
           })}
         </nav>
       </div>
+
+      {/* Cluster list modal */}
+      {clusterEvents && (
+        <ClusterList
+          events={clusterEvents}
+          onSelect={e => { setSelectedEvent(e); setClusterEvents(null) }}
+          onClose={() => setClusterEvents(null)}
+        />
+      )}
 
       {/* Event detail modal */}
       {selectedEvent && (

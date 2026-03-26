@@ -74,17 +74,20 @@ interface GlobeRing {
 interface Props {
   events: WorldEvent[]
   onEventClick?: (e: WorldEvent) => void
+  onClusterClick?: (events: WorldEvent[]) => void
 }
 
-export default function Globe3D({ events, onEventClick }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
+export default function Globe3D({ events, onEventClick, onClusterClick }: Props) {
+  const containerRef   = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeRef    = useRef<any>(null)
-  const eventsRef   = useRef<WorldEvent[]>(events)
-  const onClickRef  = useRef(onEventClick)
+  const globeRef       = useRef<any>(null)
+  const eventsRef      = useRef<WorldEvent[]>(events)
+  const onClickRef     = useRef(onEventClick)
+  const onClusterRef   = useRef(onClusterClick)
 
-  useEffect(() => { onClickRef.current = onEventClick }, [onEventClick])
-  useEffect(() => { eventsRef.current = events },         [events])
+  useEffect(() => { onClickRef.current   = onEventClick   }, [onEventClick])
+  useEffect(() => { onClusterRef.current = onClusterClick }, [onClusterClick])
+  useEffect(() => { eventsRef.current    = events         }, [events])
 
   const toPoints = useCallback((clusters: Cluster[], rScale: number): GlobePt[] =>
     clusters.map(c => {
@@ -138,10 +141,14 @@ export default function Globe3D({ events, onEventClick }: Props) {
         .pointsMerge(false)
         .onPointClick((pt: GlobePt) => {
           if (!pt?.cluster) return
-          const top = pt.cluster.events.reduce((b, e) =>
-            SEVERITY_RANK[e.severity] > SEVERITY_RANK[b.severity] ? e : b
-          )
-          onClickRef.current?.(top)
+          if (pt.cluster.count > 1 && onClusterRef.current) {
+            onClusterRef.current(pt.cluster.events)
+          } else {
+            const top = pt.cluster.events.reduce((b, e) =>
+              SEVERITY_RANK[e.severity] > SEVERITY_RANK[b.severity] ? e : b
+            )
+            onClickRef.current?.(top)
+          }
         })
         .onPointHover((pt: GlobePt | null) => {
           container.style.cursor = pt ? 'pointer' : 'default'

@@ -1,6 +1,14 @@
 'use client'
-import { WorldEvent } from '@/lib/types'
-import { TYPE_COLORS } from '@/components/Globe3D'
+
+import { WorldEvent, Severity } from '@/lib/types'
+
+const SEV_COLOR: Record<Severity, string> = {
+  critical: 'bg-red-500',
+  high:     'bg-orange-500',
+  medium:   'bg-yellow-500',
+  low:      'bg-blue-400',
+}
+const SEV_RANK: Record<Severity, number> = { critical: 3, high: 2, medium: 1, low: 0 }
 
 interface Props {
   events: WorldEvent[]
@@ -9,63 +17,40 @@ interface Props {
 }
 
 export default function ClusterList({ events, onSelect, onClose }: Props) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm bg-[#000818] border border-cyan-900/50 rounded-t-2xl md:rounded-lg overflow-hidden flex flex-col"
-        style={{ maxHeight: '65vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-900/30 flex-shrink-0">
-          <span className="text-[11px] font-mono text-cyan-400 tracking-widest uppercase">
-            이 지역 이벤트 {events.length}건
-          </span>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-300 text-xl leading-none w-6 h-6 flex items-center justify-center"
-          >
-            ×
-          </button>
-        </div>
+  const sorted = [...events].sort((a, b) => {
+    const sd = SEV_RANK[b.severity] - SEV_RANK[a.severity]
+    if (sd !== 0) return sd
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  })
 
-        {/* List */}
-        <div className="overflow-y-auto">
-          {events
-            .sort((a, b) => {
-              const sev = { critical: 3, high: 2, medium: 1, low: 0 }
-              return (sev[b.severity] - sev[a.severity]) ||
-                     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            })
-            .map(e => (
-              <button
-                key={e.id}
-                onClick={() => { onSelect(e); onClose() }}
-                className="w-full text-left px-4 py-3 border-b border-gray-900/60 hover:bg-white/5 active:bg-white/10 transition-colors flex items-start gap-3"
-              >
-                <span
-                  className="mt-1 w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: TYPE_COLORS[e.type] ?? '#888' }}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-200 leading-snug line-clamp-2">{e.title}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-[9px] font-mono font-bold ${
-                      e.severity === 'critical' ? 'text-red-400' :
-                      e.severity === 'high'     ? 'text-orange-400' :
-                      e.severity === 'medium'   ? 'text-yellow-400' : 'text-gray-500'
-                    }`}>
-                      {e.severity.toUpperCase()}
-                    </span>
-                    <span className="text-[9px] text-gray-600">{e.location}</span>
-                    <span className="text-[9px] text-gray-700 truncate">{e.source.split(' · ')[0]}</span>
-                  </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md max-h-[80vh] flex flex-col bg-[#050510] border border-cyan-900/60 rounded shadow-2xl">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-900/40">
+          <span className="text-cyan-400 text-xs font-mono tracking-widest">
+            CLUSTER · {events.length}개 이벤트
+          </span>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-300 text-lg leading-none">✕</button>
+        </div>
+        <div className="overflow-y-auto flex-1">
+          {sorted.map(e => (
+            <button
+              key={e.id}
+              onClick={() => { onSelect(e); onClose() }}
+              className="w-full text-left px-4 py-3 border-b border-cyan-900/20 hover:bg-cyan-900/10 transition-colors flex items-start gap-3"
+            >
+              <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${SEV_COLOR[e.severity]}`} />
+              <div className="min-w-0 flex-1">
+                <p className="text-gray-100 text-xs leading-snug line-clamp-2">{e.title}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-mono text-gray-500">{e.severity.toUpperCase()}</span>
+                  {e.location && <span className="text-[10px] text-gray-600 truncate">{e.location}</span>}
+                  <span className="text-[10px] text-gray-700 ml-auto flex-shrink-0">{e.source}</span>
                 </div>
-              </button>
-            ))}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
